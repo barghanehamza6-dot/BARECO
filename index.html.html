@@ -1,0 +1,2322 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BARECO – La comptabilité qui s'écrit toute seule</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --navy:#0d2b6b;--blue:#1a4fa0;--sky:#5b9bd5;--red:#e63946;--red2:#c1121f;
+  --bg:#eef2f8;--white:#fff;--text:#1a1a2e;--muted:#6b7a99;
+  --border:#c8d4e8;--green:#2d9e6b;--orange:#f4a023;--teal:#0d9488;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Montserrat',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ═══ NAV ═══ */
+nav{background:linear-gradient(135deg,var(--navy),var(--blue) 55%,var(--navy));display:flex;align-items:center;padding:0 24px;height:60px;box-shadow:0 3px 16px rgba(0,0,0,.4);position:sticky;top:0;z-index:500;}
+.nav-logo{display:flex;align-items:center;gap:8px;cursor:pointer;margin-right:22px;}
+.nav-logo svg{width:37px;height:37px;}
+.nav-logo span{font-weight:800;font-size:19px;color:#fff;letter-spacing:1px;}
+.nav-links{display:flex;align-items:center;gap:1px;flex:1;}
+.nav-item{position:relative;}
+.nav-item>a{color:#cfe0ff;text-decoration:none;font-size:12.5px;font-weight:600;padding:6px 12px;border-radius:6px;display:flex;align-items:center;gap:4px;cursor:pointer;transition:background .18s,color .18s;}
+.nav-item>a:hover,.nav-item.open>a{background:rgba(255,255,255,.15);color:#fff;}
+.arr{font-size:9px;transition:transform .2s;}
+.nav-item.open>a .arr{transform:rotate(180deg);}
+.dropdown{display:none;position:absolute;top:calc(100% + 6px);left:0;background:#fff;border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.16);min-width:215px;overflow:hidden;animation:dropIn .15s ease;z-index:600;}
+.nav-item.open .dropdown{display:block;}
+@keyframes dropIn{from{opacity:0;transform:translateY(-7px);}to{opacity:1;transform:translateY(0);}}
+.dropdown a{display:flex;align-items:center;gap:10px;padding:11px 16px;color:var(--text);text-decoration:none;font-size:12.5px;font-weight:600;border-bottom:1px solid #f0f3f8;transition:background .15s;cursor:pointer;}
+.dropdown a:last-child{border-bottom:none;}
+.dropdown a:hover{background:#f0f6ff;color:var(--blue);}
+.ico{font-size:15px;width:18px;text-align:center;}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:9px;}
+.nav-user-btn{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);color:#fff;font-size:12px;font-weight:700;padding:6px 13px;border-radius:7px;cursor:pointer;border:1.5px solid rgba(255,255,255,.25);transition:background .2s;}
+.nav-user-btn:hover{background:rgba(255,255,255,.2);}
+.nav-logout{background:none;border:1.5px solid rgba(255,255,255,.3);color:rgba(255,255,255,.7);font-size:11px;font-weight:600;padding:5px 11px;border-radius:6px;cursor:pointer;font-family:'Montserrat',sans-serif;transition:border-color .18s,color .18s;}
+.nav-logout:hover{border-color:#fff;color:#fff;}
+.nav-reg{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:700;font-size:12px;padding:8px 18px;border-radius:8px;border:2px solid #ff7070;cursor:pointer;box-shadow:0 3px 10px rgba(230,57,70,.3);transition:opacity .2s;font-family:'Montserrat',sans-serif;}
+.nav-reg:hover{opacity:.88;}
+
+/* ═══ AUTH OVERLAY ═══ */
+.auth-overlay{position:fixed;inset:0;background:rgba(10,18,58,.88);backdrop-filter:blur(8px);z-index:900;display:flex;align-items:center;justify-content:center;}
+.auth-box{background:#fff;border-radius:18px;padding:40px 44px;width:420px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.auth-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:28px;}
+.auth-logo svg{width:44px;height:44px;}
+.auth-logo span{font-weight:800;font-size:24px;color:var(--navy);}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:24px;}
+.auth-tab{flex:1;padding:10px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;border-bottom:3px solid transparent;margin-bottom:-2px;color:var(--muted);transition:color .18s,border-color .18s;}
+.auth-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.auth-pane{display:none;}
+.auth-pane.active{display:block;}
+.auth-field{margin-bottom:14px;}
+.auth-field label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px;}
+.auth-field input{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);transition:border-color .18s;}
+.auth-field input:focus{border-color:var(--blue);}
+.auth-err{color:var(--red);font-size:12px;font-weight:600;margin-bottom:10px;display:none;}
+.auth-btn{width:100%;background:linear-gradient(135deg,var(--blue),var(--navy));color:#fff;font-weight:700;font-size:14px;padding:12px;border-radius:9px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;transition:opacity .2s;margin-top:4px;}
+.auth-btn:hover{opacity:.9;}
+.auth-note{text-align:center;font-size:12px;color:var(--muted);margin-top:14px;}
+
+/* ═══ PAGES ═══ */
+.page{display:none;min-height:calc(100vh - 60px);}
+.page.active{display:block;}
+
+/* ═══ HOME ═══ */
+.hero{position:relative;min-height:400px;display:flex;align-items:center;justify-content:center;text-align:center;padding:60px 20px;overflow:hidden;}
+.hero-bg{position:absolute;inset:0;background:linear-gradient(rgba(10,20,58,.76),rgba(10,20,58,.76)),url('https://images.unsplash.com/photo-1554224155-6726b3ff858f?w=1400&q=80') center/cover;z-index:0;}
+.hero-bg::after{content:'';position:absolute;inset:0;background-image:radial-gradient(circle,rgba(91,155,213,.14) 1px,transparent 1px);background-size:36px 36px;animation:drift 20s linear infinite;}
+@keyframes drift{from{background-position:0 0;}to{background-position:36px 36px;}}
+.hero-content{position:relative;z-index:1;max-width:680px;}
+.hero-title{font-size:clamp(22px,3.6vw,42px);font-weight:800;color:#fff;line-height:1.2;margin-bottom:18px;text-shadow:0 2px 12px rgba(0,0,0,.5);}
+.hero-title span{color:var(--sky);}
+.hero-sub{font-size:14px;color:#b8cfe8;line-height:1.8;margin-bottom:32px;}
+.hero-cta{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
+.btn-red{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff;font-weight:700;font-size:13px;padding:12px 26px;border-radius:9px;border:2px solid #ff7070;cursor:pointer;box-shadow:0 4px 14px rgba(230,57,70,.3);transition:transform .2s;font-family:'Montserrat',sans-serif;}
+.btn-red:hover{transform:translateY(-2px);}
+.btn-ghost{background:rgba(255,255,255,.1);color:#fff;font-weight:700;font-size:13px;padding:12px 26px;border-radius:9px;border:2px solid rgba(255,255,255,.25);cursor:pointer;font-family:'Montserrat',sans-serif;transition:background .2s;}
+.btn-ghost:hover{background:rgba(255,255,255,.2);}
+.flow-section{background:#fff;padding:50px 20px;}
+.flow-title{text-align:center;font-size:20px;font-weight:800;margin-bottom:36px;}
+.flow-title span{color:var(--blue);}
+.flow-steps{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;max-width:920px;margin:0 auto;}
+.flow-step{background:var(--bg);border:2px solid var(--border);border-radius:12px;padding:20px 16px;text-align:center;width:130px;cursor:pointer;transition:transform .2s,border-color .2s;}
+.flow-step:hover{transform:translateY(-3px);border-color:var(--blue);}
+.flow-step .fi{font-size:32px;margin-bottom:8px;}
+.flow-step .fl{font-size:11px;font-weight:700;}
+.flow-arrow{font-size:20px;color:var(--sky);padding:0 5px;font-weight:700;}
+.modules-section{padding:50px 20px;background:var(--bg);}
+.modules-title{text-align:center;font-size:20px;font-weight:800;margin-bottom:32px;}
+.modules-title span{color:var(--red);}
+.modules-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(175px,1fr));gap:16px;max-width:940px;margin:0 auto;}
+.mod-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:24px 16px;text-align:center;cursor:pointer;transition:transform .2s,border-color .2s,box-shadow .2s;}
+.mod-card:hover{transform:translateY(-3px);border-color:var(--sky);box-shadow:0 6px 20px rgba(26,79,160,.1);}
+.mod-card .mi{font-size:36px;margin-bottom:10px;}
+.mod-card .mt{font-size:13px;font-weight:700;margin-bottom:4px;}
+.mod-card .md{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* ═══ INNER ═══ */
+.inner{max-width:1060px;margin:30px auto;padding:0 18px 56px;}
+.bc{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--muted);margin-bottom:20px;flex-wrap:wrap;}
+.bc a{color:var(--blue);cursor:pointer;font-weight:600;text-decoration:none;}
+.bc a:hover{text-decoration:underline;}
+.bc-sep{color:var(--border);}
+.ph{display:flex;align-items:center;gap:12px;margin-bottom:22px;flex-wrap:wrap;}
+.ph .phi{font-size:34px;}
+.ph>div:nth-child(2){flex:1;}
+.ph h1{font-size:21px;font-weight:800;}
+.ph p{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* ═══ CARD ═══ */
+.card{background:#fff;border-radius:14px;box-shadow:0 4px 22px rgba(0,0,0,.08);overflow:hidden;}
+.card-p{padding:28px 32px;}
+
+/* ═══ TABS ═══ */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:24px;}
+.tab-btn{padding:10px 20px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .18s,border-color .18s;}
+.tab-btn.active{color:var(--blue);border-bottom-color:var(--blue);}
+.tab-pane{display:none;}
+.tab-pane.active{display:block;}
+
+/* ═══ FORM FIELDS ═══ */
+.fg{display:flex;flex-direction:column;gap:4px;}
+.fg label{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.fg input,.fg select,.fg textarea{border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:13px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);transition:border-color .18s;background:#fff;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--blue);}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:14px;}
+
+/* ═══ FACTURE ═══ */
+.fac-hdr{background:linear-gradient(135deg,var(--navy),var(--blue));padding:22px 28px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:16px;}
+.fh-lbl{color:rgba(255,255,255,.6);font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;display:block;margin-bottom:3px;}
+.fh-v{font-size:16px;font-weight:800;color:#fff;margin-bottom:8px;}
+.fh-i{background:rgba(255,255,255,.14);border:1.5px solid rgba(255,255,255,.26);color:#fff;border-radius:7px;padding:7px 11px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;display:block;margin-bottom:7px;width:210px;}
+.fh-i::placeholder{color:rgba(255,255,255,.45);}
+.fh-i.r{text-align:right;}
+.fac-envoi{background:#f7faff;border-bottom:1.5px solid var(--border);padding:16px 28px;display:flex;gap:24px;flex-wrap:wrap;}
+.env-lbl{font-size:9.5px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;display:block;}
+.env-i{border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;width:200px;display:block;margin-bottom:5px;color:var(--text);transition:border-color .18s;}
+.env-i:focus{border-color:var(--blue);}
+.env-s{border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);background:#fff;display:block;margin-bottom:5px;}
+/* Achat type choice */
+.achat-type-row{display:flex;gap:10px;margin:10px 28px 0;flex-wrap:wrap;}
+.achat-type-btn{flex:1;padding:10px;border:2px solid var(--border);border-radius:9px;text-align:center;cursor:pointer;font-size:12px;font-weight:700;color:var(--muted);transition:border-color .18s,color .18s,background .18s;}
+.achat-type-btn:hover{border-color:var(--sky);}
+.achat-type-btn.sel{border-color:var(--blue);color:var(--blue);background:#e8f0ff;}
+.achat-type-btn .atb-icon{font-size:22px;margin-bottom:4px;}
+/* Immobilisation nature selector */
+.immo-nature-row{background:#fff8ec;border:1.5px solid var(--orange);border-radius:9px;padding:12px 16px;margin:8px 28px;display:none;}
+.immo-nature-row label{font-size:10.5px;font-weight:700;color:var(--orange);text-transform:uppercase;display:block;margin-bottom:5px;}
+.immo-nature-row select{border:1.5px solid var(--orange);border-radius:7px;padding:7px 11px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);background:#fff;width:100%;}
+.immo-compte-badge{margin-top:6px;font-size:11px;font-weight:700;color:var(--orange);}
+
+.lines-zone{padding:16px 28px;}
+.lt{width:100%;border-collapse:collapse;margin-bottom:12px;}
+.lt th{background:var(--bg);font-size:10.5px;font-weight:700;padding:8px 9px;border:1.5px solid var(--border);text-align:center;text-transform:uppercase;letter-spacing:.3px;}
+.lt td{border:1.5px solid var(--border);padding:4px 6px;}
+.lt td input{width:100%;border:none;outline:none;font-family:'Montserrat',sans-serif;font-size:12.5px;padding:4px 5px;background:transparent;color:var(--text);text-align:center;}
+.lt td.des-td input{text-align:left;}
+.del-btn{background:none;border:none;cursor:pointer;color:#ccc;font-size:14px;transition:color .15s;padding:2px 4px;}
+.del-btn:hover{color:var(--red);}
+.add-line-btn{background:none;border:2px dashed var(--border);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;transition:border-color .18s,color .18s;width:100%;font-family:'Montserrat',sans-serif;}
+.add-line-btn:hover{border-color:var(--blue);color:var(--blue);}
+.tva-row{display:flex;align-items:center;gap:9px;padding:0 28px 8px;font-size:12.5px;color:var(--muted);}
+.tva-row select{border:1.5px solid var(--border);border-radius:7px;padding:5px 9px;font-family:'Montserrat',sans-serif;font-size:12.5px;outline:none;color:var(--text);}
+.totaux{display:flex;justify-content:flex-end;padding:0 28px 18px;}
+.tot-box{width:280px;}
+.tot-row{display:flex;justify-content:space-between;padding:7px 12px;font-size:12.5px;border-bottom:1px solid var(--border);}
+.tot-row.ht{color:var(--muted);}
+.tot-row.tva-r{color:var(--orange);font-weight:600;}
+.tot-row.ttc{font-weight:800;font-size:14px;background:var(--bg);border-radius:8px;padding:10px 12px;}
+.fac-footer{padding:16px 28px 24px;display:flex;gap:11px;flex-wrap:wrap;}
+.btn-enreg{background:linear-gradient(135deg,var(--green),#1e7d52);color:#fff;font-weight:700;font-size:13px;padding:11px 24px;border-radius:9px;border:none;cursor:pointer;box-shadow:0 4px 13px rgba(45,158,107,.25);transition:transform .2s;font-family:'Montserrat',sans-serif;}
+.btn-enreg:hover{transform:translateY(-2px);}
+.btn-reset{background:#fff;color:var(--muted);font-weight:600;font-size:12.5px;padding:11px 18px;border-radius:9px;border:1.5px solid var(--border);cursor:pointer;font-family:'Montserrat',sans-serif;transition:border-color .18s;}
+.btn-reset:hover{border-color:var(--red);color:var(--red);}
+
+/* ═══ OPERATIONS ═══ */
+.op-type-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:9px;margin-bottom:18px;}
+.op-card{border:2px solid var(--border);border-radius:10px;padding:13px 10px;text-align:center;cursor:pointer;transition:border-color .18s,background .18s;}
+.op-card:hover{border-color:var(--sky);}
+.op-card.sel{border-color:var(--blue);background:#e8f0ff;}
+.op-card .oci{font-size:24px;margin-bottom:5px;}
+.op-card .ocl{font-size:11.5px;font-weight:700;color:var(--text);}
+.op-card .ocs{font-size:10px;color:var(--muted);margin-top:1px;}
+.op-zone{background:var(--bg);border-radius:10px;padding:16px;margin-bottom:15px;}
+.op-zone-title{font-size:11px;font-weight:800;color:var(--navy);margin-bottom:11px;text-transform:uppercase;letter-spacing:.4px;}
+.preview-zone{background:var(--bg);border-radius:10px;padding:14px;margin-bottom:14px;}
+.preview-title{font-size:11px;font-weight:800;color:var(--teal);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* ═══ JOURNAL MANUEL ═══ */
+.jm-entry{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px;}
+.jm-hdr{background:linear-gradient(90deg,#e8f2ff,#f0f6ff);padding:7px 14px;font-size:11.5px;font-weight:700;color:var(--blue);border-bottom:1.5px solid var(--border);}
+.jm-row{display:grid;grid-template-columns:95px 1fr 115px 115px 36px;border-bottom:1px solid #f0f3f8;align-items:center;}
+.jm-row:last-child{border-bottom:none;}
+.jm-cell{padding:7px 11px;font-size:12.5px;}
+.jm-num-wrap{position:relative;}
+.jm-num-inp{width:100%;border:none;outline:none;font-family:'Montserrat',sans-serif;font-size:12.5px;padding:0;background:transparent;color:var(--navy);font-weight:700;}
+.jm-lib-inp{width:100%;border:none;outline:none;font-family:'Montserrat',sans-serif;font-size:12.5px;padding:0;background:transparent;}
+.jm-amt-inp{width:100%;border:none;outline:none;font-family:'Montserrat',sans-serif;font-size:12.5px;padding:0;background:transparent;text-align:right;font-weight:700;}
+.pcm-dropdown{position:absolute;top:100%;left:0;z-index:200;background:#fff;border:1.5px solid var(--border);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.14);width:340px;max-height:200px;overflow-y:auto;display:none;}
+.pcm-item{padding:8px 12px;font-size:12px;cursor:pointer;border-bottom:1px solid #f0f3f8;display:flex;gap:10px;align-items:center;}
+.pcm-item:hover{background:#f0f6ff;}
+.pcm-item .pcm-num{font-weight:800;color:var(--navy);min-width:50px;}
+.pcm-item .pcm-nom{color:var(--text);}
+.add-jm-row-btn{background:none;border:2px dashed var(--border);border-radius:7px;padding:6px 12px;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Montserrat',sans-serif;transition:border-color .18s,color .18s;}
+.add-jm-row-btn:hover{border-color:var(--blue);color:var(--blue);}
+
+/* ═══ JOURNAL VIEW ═══ */
+.j-entry{border:1.5px solid var(--border);border-radius:10px;margin-bottom:14px;overflow:hidden;}
+.j-date-bar{background:linear-gradient(90deg,#e8f2ff,#f0f6ff);padding:7px 14px;font-size:11.5px;font-weight:700;color:var(--blue);border-bottom:1.5px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:5px;}
+.j-row{display:grid;grid-template-columns:92px 1fr 114px 114px;border-bottom:1px solid #f0f3f8;}
+.j-row:last-child{border-bottom:none;}
+.j-row.jh{background:var(--bg);font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;}
+.j-cell{padding:8px 11px;font-size:12.5px;display:flex;align-items:center;}
+.j-cell.dbt{color:var(--navy);font-weight:600;}
+.j-cell.crd{color:var(--blue);font-style:italic;padding-left:28px;}
+.j-cell.amt{justify-content:flex-end;font-weight:700;}
+.j-ref{background:#f7faff;padding:5px 14px;font-size:10.5px;color:var(--muted);border-top:1px solid #eef1f7;}
+.j-empty{text-align:center;padding:44px 20px;color:var(--muted);}
+.j-empty .jei{font-size:48px;margin-bottom:12px;}
+.j-empty a{color:var(--blue);cursor:pointer;font-weight:700;}
+
+/* ═══ GRAND LIVRE ═══ */
+.gl-section{margin-bottom:26px;}
+.gl-sec-title{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:800;color:var(--navy);margin-bottom:12px;padding-bottom:6px;border-bottom:2px solid var(--border);}
+.gl-sec-title::before{content:'•';color:var(--red);font-size:17px;}
+.gl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:13px;}
+.gl-cpt{border:1.5px solid var(--border);border-radius:10px;overflow:hidden;background:#fff;}
+.gl-cpt-hdr{background:linear-gradient(90deg,var(--navy),var(--blue));padding:9px 13px;display:flex;justify-content:space-between;align-items:center;}
+.gl-cpt-num{font-size:12.5px;font-weight:800;color:#fff;}
+.gl-cpt-name{font-size:10px;color:#b8d4f8;max-width:155px;text-align:right;}
+.gl-dc{display:grid;grid-template-columns:1fr 1fr;}
+.gl-dc-h{padding:5px 10px;font-size:10.5px;font-weight:800;text-align:center;border-bottom:1.5px solid var(--border);}
+.gl-dc-h.d{background:#fff8f8;color:var(--red);border-right:1px solid var(--border);}
+.gl-dc-h.c{background:#f0f6ff;color:var(--blue);}
+.gl-vals{display:grid;grid-template-columns:1fr 1fr;}
+.gl-v{padding:8px 10px;font-size:12.5px;font-weight:700;text-align:center;}
+.gl-v.d{border-right:1px solid var(--border);}
+.gl-solde{padding:6px 10px;font-size:11px;font-weight:700;text-align:center;border-top:1.5px solid var(--border);}
+.gl-solde.sd{background:#fff0f0;color:var(--red);}
+.gl-solde.sc{background:#f0f6ff;color:var(--blue);}
+
+/* ═══ BILAN - NOUVEAU MODULE ═══ */
+.bilan-wrapper{background:#fff;border-radius:14px;box-shadow:0 4px 22px rgba(0,0,0,.08);overflow:hidden;}
+.bilan-top-bar{background:linear-gradient(135deg,var(--navy),var(--blue));padding:22px 28px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;}
+.bilan-top-bar h2{font-size:18px;font-weight:800;color:#fff;}
+.bilan-top-bar p{font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;}
+.bilan-date-badge{background:rgba(255,255,255,.15);border:1.5px solid rgba(255,255,255,.3);border-radius:8px;padding:7px 14px;font-size:12px;font-weight:700;color:#fff;}
+
+.bilan-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:0;border-bottom:2px solid var(--border);}
+.bilan-kpi{padding:18px 22px;text-align:center;border-right:1.5px solid var(--border);}
+.bilan-kpi:last-child{border-right:none;}
+.bilan-kpi .bk-val{font-size:20px;font-weight:800;}
+.bilan-kpi .bk-lbl{font-size:10.5px;color:var(--muted);font-weight:600;margin-top:3px;text-transform:uppercase;letter-spacing:.4px;}
+
+.bilan-cols{display:grid;grid-template-columns:1fr 1fr;}
+.bilan-col{padding:22px 24px;}
+.bilan-col-hdr{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.8px;padding:8px 12px;border-radius:7px;text-align:center;margin-bottom:18px;}
+.bilan-col-hdr.actif{background:#fff0f0;color:var(--red);}
+.bilan-col-hdr.passif{background:#e8f0ff;color:var(--blue);}
+.bilan-col:first-child{border-right:2px solid var(--border);}
+
+.bilan-section{margin-bottom:18px;}
+.bilan-section-hdr{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:var(--white);padding:6px 11px;border-radius:7px;margin-bottom:10px;}
+.bilan-section-hdr.ai{background:var(--navy);}
+.bilan-section-hdr.ac{background:var(--blue);}
+.bilan-section-hdr.ta{background:var(--teal);}
+.bilan-section-hdr.fp{background:#7c3aed;}
+.bilan-section-hdr.pc{background:var(--orange);color:#fff;}
+.bilan-section-hdr.tp{background:#64748b;}
+
+.bilan-group{margin-bottom:10px;}
+.bilan-group-title{font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;padding:3px 0 5px;border-bottom:1px dashed var(--border);margin-bottom:6px;}
+.bilan-ligne{display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:6px;font-size:12.5px;transition:background .15s;}
+.bilan-ligne:hover{background:var(--bg);}
+.bilan-ligne .bl-nom{color:var(--text);}
+.bilan-ligne .bl-val{font-weight:700;color:var(--navy);white-space:nowrap;}
+.bilan-ligne .bl-val.zero{color:#ccc;font-weight:400;}
+.bilan-ligne.active .bl-nom{font-weight:600;color:var(--navy);}
+.bilan-sous-total{display:flex;justify-content:space-between;padding:6px 8px;border-top:1.5px solid var(--border);margin-top:6px;font-size:12px;font-weight:800;}
+.bilan-sous-total .bst-val{color:var(--blue);}
+
+.bilan-total-bar{display:grid;grid-template-columns:1fr 1fr;border-top:2px solid var(--text);}
+.bilan-total-cell{padding:14px 24px;display:flex;justify-content:space-between;align-items:center;}
+.bilan-total-cell:first-child{border-right:2px solid var(--text);}
+.bilan-total-cell .btc-label{font-size:13px;font-weight:800;color:var(--text);}
+.bilan-total-cell .btc-val{font-size:16px;font-weight:800;color:var(--navy);}
+
+.bilan-equilibre{text-align:center;padding:10px;font-size:12px;font-weight:700;}
+.bilan-equilibre.ok{color:var(--green);background:#e8f8ef;}
+.bilan-equilibre.nok{color:var(--red);background:#fff0f0;}
+
+/* ═══ CPC ═══ */
+.cpc-tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+.cpc-tbl thead th{background:var(--navy);color:#fff;font-weight:700;font-size:12px;padding:11px 14px;border:1.5px solid var(--navy);text-align:center;}
+.cpc-tbl tbody td{padding:8px 13px;border:1.5px solid var(--border);font-size:12.5px;}
+.cpc-tbl .cat-row td{font-weight:800;background:linear-gradient(90deg,#f5f8ff,#fff);color:var(--navy);font-size:13px;}
+.cpc-tbl .sub-row td:first-child{padding-left:26px;}
+.cpc-tbl .total-row td{font-weight:800;background:var(--bg);font-size:13px;border-top:2px solid var(--text);}
+.cpc-tbl .res-row td{font-weight:800;font-size:13px;background:linear-gradient(90deg,#e8f8ef,#f0fff6);color:var(--green);}
+.cpc-tbl .res-row.loss td{background:linear-gradient(90deg,#fff0f0,#fff5f5);color:var(--red);}
+.cpc-tbl .amt{text-align:right;font-weight:700;white-space:nowrap;}
+
+/* ═══ PLAN COMPTABLE ═══ */
+.pcm-search-box{position:relative;margin-bottom:20px;}
+.pcm-search-box input{width:100%;border:2px solid var(--border);border-radius:10px;padding:11px 16px 11px 40px;font-size:13px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);transition:border-color .18s;}
+.pcm-search-box input:focus{border-color:var(--blue);}
+.pcm-search-box::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;}
+.pcm-classe-title{font-size:13px;font-weight:800;color:var(--navy);padding:10px 0 6px;border-bottom:2px solid var(--border);margin-bottom:8px;display:flex;align-items:center;gap:7px;}
+.pcm-classe-title::before{content:'';width:4px;height:16px;background:var(--red);border-radius:2px;display:inline-block;}
+.pcm-table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:12.5px;}
+.pcm-table thead th{background:var(--bg);font-size:11px;font-weight:700;padding:8px 12px;border:1.5px solid var(--border);text-align:left;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.pcm-table tbody td{padding:7px 12px;border:1.5px solid var(--border);font-size:12.5px;}
+.pcm-table tbody tr:hover{background:#f7faff;}
+.pcm-num{font-weight:800;color:var(--navy);}
+.pcm-use-btn{background:none;border:1.5px solid var(--border);border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;color:var(--blue);cursor:pointer;font-family:'Montserrat',sans-serif;transition:border-color .18s,background .18s;}
+.pcm-use-btn:hover{border-color:var(--blue);background:#e8f0ff;}
+
+/* ═══ DASHBOARD ═══ */
+.dash-section{padding:28px 20px;max-width:1060px;margin:0 auto;}
+.dash-title{font-size:13px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;display:flex;align-items:center;gap:6px;}
+.dash-title::before{content:'';width:3px;height:14px;background:var(--red);border-radius:2px;display:inline-block;}
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:28px;}
+.kpi-card{background:#fff;border-radius:12px;padding:20px 22px;box-shadow:0 2px 12px rgba(0,0,0,.07);border:1.5px solid var(--border);cursor:pointer;transition:transform .2s,box-shadow .2s;}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:0 6px 20px rgba(0,0,0,.11);}
+.kpi-card .kc-icon{font-size:28px;margin-bottom:10px;}
+.kpi-card .kc-val{font-size:22px;font-weight:800;margin-bottom:3px;}
+.kpi-card .kc-lbl{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;}
+.kpi-card .kc-sub{font-size:10.5px;color:var(--muted);margin-top:4px;}
+.dash-grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:22px;}
+.dash-card{background:#fff;border-radius:12px;padding:22px;box-shadow:0 2px 12px rgba(0,0,0,.07);border:1.5px solid var(--border);}
+.dash-card-title{font-size:13px;font-weight:800;color:var(--text);margin-bottom:14px;display:flex;justify-content:space-between;align-items:center;}
+.dash-card-title a{font-size:11px;font-weight:600;color:var(--blue);cursor:pointer;text-decoration:none;}
+.dash-card-title a:hover{text-decoration:underline;}
+.dash-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0f3f8;font-size:12.5px;}
+.dash-row:last-child{border-bottom:none;}
+.dash-row .dr-nom{color:var(--text);}
+.dash-row .dr-val{font-weight:700;}
+.dash-bar-wrap{margin-top:10px;}
+.dash-bar-item{margin-bottom:10px;}
+.dash-bar-label{display:flex;justify-content:space-between;font-size:11.5px;margin-bottom:4px;font-weight:600;}
+.dash-bar-track{background:var(--bg);border-radius:20px;height:8px;overflow:hidden;}
+.dash-bar-fill{height:100%;border-radius:20px;transition:width .4s ease;}
+.dash-empty{text-align:center;padding:28px 10px;color:var(--muted);}
+.dash-empty .dei{font-size:36px;margin-bottom:8px;}
+.dash-empty p{font-size:12.5px;}
+.dash-empty a{color:var(--blue);cursor:pointer;font-weight:700;}
+.dash-actions{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+.dash-action-btn{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:12px 18px;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;font-family:'Montserrat',sans-serif;transition:border-color .18s,background .18s;}
+.dash-action-btn:hover{border-color:var(--blue);background:#f0f6ff;color:var(--blue);}
+.dash-action-btn .dab-icon{font-size:20px;}
+@media(max-width:700px){.dash-grid2{grid-template-columns:1fr;}.kpi-grid{grid-template-columns:repeat(2,1fr);}}
+.fisc-hero{background:linear-gradient(135deg,var(--navy),var(--teal));padding:28px 28px;color:#fff;border-radius:14px 14px 0 0;}
+.fisc-hero h2{font-size:18px;font-weight:800;margin-bottom:5px;}
+.fisc-hero p{font-size:12.5px;color:rgba(255,255,255,.72);line-height:1.7;}
+.fisc-tabs{display:flex;background:#fff;border-bottom:2px solid var(--border);}
+.fisc-tab{padding:12px 22px;font-size:12.5px;font-weight:700;cursor:pointer;border:none;background:none;color:var(--muted);font-family:'Montserrat',sans-serif;border-bottom:3px solid transparent;margin-bottom:-2px;transition:color .18s,border-color .18s;}
+.fisc-tab.active{color:var(--blue);border-bottom-color:var(--blue);}
+.fisc-pane{display:none;padding:24px 28px;}
+.fisc-pane.active{display:block;}
+.info-h3{font-size:14px;font-weight:800;color:var(--navy);margin:20px 0 9px;display:flex;align-items:center;gap:7px;}
+.info-p{font-size:12.5px;line-height:1.75;color:#333;margin-bottom:10px;}
+.info-box{border-radius:9px;padding:13px 16px;margin-bottom:13px;}
+.info-box.blue{background:#e8f0ff;border-left:4px solid var(--blue);}
+.info-box.green{background:#e8f8ef;border-left:4px solid var(--green);}
+.info-box.orange{background:#fff8ec;border-left:4px solid var(--orange);}
+.info-box.red{background:#fff0f0;border-left:4px solid var(--red);}
+.info-box strong{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:3px;}
+.bareme-tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin:11px 0;}
+.bareme-tbl thead th{background:var(--navy);color:#fff;padding:9px 13px;text-align:left;font-size:11.5px;font-weight:700;}
+.bareme-tbl tbody tr:nth-child(even){background:var(--bg);}
+.bareme-tbl tbody td{padding:8px 13px;border-bottom:1px solid var(--border);}
+.calc-box{background:var(--bg);border-radius:11px;padding:20px 22px;margin-top:14px;}
+.calc-box h4{font-size:13px;font-weight:800;color:var(--navy);margin-bottom:13px;display:flex;align-items:center;gap:7px;}
+.calc-row{display:flex;align-items:center;gap:11px;margin-bottom:11px;flex-wrap:wrap;}
+.calc-row label{font-size:12px;font-weight:700;color:var(--muted);min-width:200px;}
+.calc-row input,.calc-row select{border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);width:170px;}
+.calc-row input:focus{border-color:var(--blue);}
+.calc-result{background:#fff;border-radius:9px;padding:14px 18px;margin-top:12px;border:1.5px solid var(--border);}
+.cr-row{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f3f8;font-size:12.5px;}
+.cr-row:last-child{border-bottom:none;font-weight:800;font-size:14px;color:var(--green);}
+
+/* ═══ STATS BAR ═══ */
+.stats-bar{background:#fff;border-radius:11px;box-shadow:0 2px 10px rgba(0,0,0,.07);padding:16px 22px;margin-bottom:20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:16px;}
+.stat-item{text-align:center;}
+.stat-val{font-size:18px;font-weight:800;color:var(--navy);}
+.stat-lbl{font-size:10px;color:var(--muted);font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:.4px;}
+
+/* ═══ BADGE ═══ */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:800;}
+.badge.green{background:#e8f8ef;color:var(--green);}
+.badge.red{background:#fff0f0;color:var(--red);}
+.badge.blue{background:#e8f0ff;color:var(--blue);}
+.badge.orange{background:#fff8ec;color:var(--orange);}
+.badge.purple{background:#f3e8ff;color:#7c3aed;}
+
+/* ═══ TOAST ═══ */
+.toast{position:fixed;bottom:24px;right:24px;background:linear-gradient(135deg,var(--green),#1e7d52);color:#fff;padding:12px 18px;border-radius:10px;font-size:12.5px;font-weight:700;box-shadow:0 6px 18px rgba(0,0,0,.18);transform:translateY(70px);opacity:0;transition:transform .3s,opacity .3s;z-index:1000;}
+.toast.show{transform:translateY(0);opacity:1;}
+
+hr.sec{border:none;border-top:1.5px solid var(--border);margin:22px 0;}
+.btn-clear{background:none;border:1.5px solid var(--border);border-radius:7px;padding:6px 13px;font-size:11.5px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Montserrat',sans-serif;transition:border-color .18s,color .18s;}
+.btn-clear:hover{border-color:var(--red);color:var(--red);}
+@media(max-width:700px){
+  .bilan-cols{grid-template-columns:1fr;}
+  .bilan-col:first-child{border-right:none;border-bottom:2px solid var(--border);}
+  .bilan-summary{grid-template-columns:1fr;}
+  .j-row{grid-template-columns:75px 1fr 90px 90px;}
+  .fac-hdr{flex-direction:column;}
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ NAV ═══════════ -->
+<nav>
+  <div class="nav-logo" onclick="showPage('home')">
+    <svg viewBox="0 0 42 42" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="21" cy="21" r="20" fill="#1a4fa0" stroke="#5b9bd5" stroke-width="2"/>
+      <path d="M21 8 L34 13 L34 22 C34 29 27 35 21 37 C15 35 8 29 8 22 L8 13 Z" fill="#0d2b6b" stroke="#5b9bd5" stroke-width="1.5"/>
+      <path d="M15 20 L19 24 L27 16" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    <span>BARECO</span>
+  </div>
+  <div class="nav-links">
+    <div class="nav-item" id="nav-saisie">
+      <a onclick="toggleDD('nav-saisie')">Saisie <span class="arr">▾</span></a>
+      <div class="dropdown">
+        <a onclick="gotoSaisie('tab-facture')"><span class="ico">🧾</span> Nouvelle Facture</a>
+        <a onclick="gotoSaisie('tab-ops')"><span class="ico">⚙️</span> Opération diverse</a>
+        <a onclick="gotoSaisie('tab-jmanuel')"><span class="ico">✏️</span> Journal Manuel</a>
+      </div>
+    </div>
+    <div class="nav-item" id="nav-etat">
+      <a onclick="toggleDD('nav-etat')">État de synthèse <span class="arr">▾</span></a>
+      <div class="dropdown">
+        <a onclick="showPage('journal')"><span class="ico">📋</span> Journal</a>
+        <a onclick="showPage('grandlivre')"><span class="ico">📒</span> Grand Livre</a>
+        <a onclick="showPage('bilan')"><span class="ico">📊</span> Bilan</a>
+        <a onclick="showPage('cpc')"><span class="ico">💰</span> CPC</a>
+      </div>
+    </div>
+    <div class="nav-item" id="nav-fisc">
+      <a onclick="toggleDD('nav-fisc')">Fiscalité <span class="arr">▾</span></a>
+      <div class="dropdown">
+        <a onclick="gotoFisc('is')"><span class="ico">🏛️</span> IS – Impôt Sociétés</a>
+        <a onclick="gotoFisc('tva')"><span class="ico">📄</span> TVA</a>
+        <a onclick="gotoFisc('ir')"><span class="ico">👤</span> IR – Impôt Revenu</a>
+      </div>
+    </div>
+    <div class="nav-item" id="nav-pcm">
+      <a onclick="showPage('pcm')">Plan Comptable <span class="ico" style="font-size:11px;margin-left:2px;">📖</span></a>
+    </div>
+  </div>
+  <div class="nav-right" id="nav-right">
+    <button class="nav-reg" onclick="openAuth('login')">Se connecter</button>
+    <button class="nav-reg" style="background:linear-gradient(135deg,var(--teal),#0a6b62);border-color:#2dd4bf;" onclick="openAuth('register')">S'inscrire</button>
+  </div>
+</nav>
+
+<!-- ═══════════ AUTH OVERLAY ═══════════ -->
+<div class="auth-overlay" id="auth-overlay" style="display:none;">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <svg viewBox="0 0 42 42" fill="none"><circle cx="21" cy="21" r="20" fill="#1a4fa0" stroke="#5b9bd5" stroke-width="2"/><path d="M21 8 L34 13 L34 22 C34 29 27 35 21 37 C15 35 8 29 8 22 L8 13 Z" fill="#0d2b6b" stroke="#5b9bd5" stroke-width="1.5"/><path d="M15 20 L19 24 L27 16" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span>BARECO</span>
+    </div>
+    <div class="auth-tabs">
+      <div class="auth-tab active" id="at-login" onclick="switchAuthTab('login')">Se connecter</div>
+      <div class="auth-tab" id="at-register" onclick="switchAuthTab('register')">S'inscrire</div>
+    </div>
+    <!-- Login -->
+    <div class="auth-pane active" id="ap-login">
+      <div class="auth-field"><label>Email</label><input type="email" id="l-email" placeholder="votre@email.com"/></div>
+      <div class="auth-field"><label>Mot de passe</label><input type="password" id="l-pass" placeholder="••••••••"/></div>
+      <div class="auth-err" id="l-err">Email ou mot de passe incorrect.</div>
+      <button class="auth-btn" onclick="doLogin()">Se connecter</button>
+      <p class="auth-note">Pas encore de compte ? <a style="color:var(--blue);cursor:pointer;font-weight:700;" onclick="switchAuthTab('register')">S'inscrire gratuitement</a></p>
+    </div>
+    <!-- Register -->
+    <div class="auth-pane" id="ap-register">
+      <div class="grid2" style="gap:10px;margin-bottom:0;">
+        <div class="auth-field"><label>Prénom</label><input type="text" id="r-prenom" placeholder="Prénom"/></div>
+        <div class="auth-field"><label>Nom</label><input type="text" id="r-nom" placeholder="Nom"/></div>
+      </div>
+      <div class="auth-field"><label>Société</label><input type="text" id="r-societe" placeholder="Nom de votre société"/></div>
+      <div class="auth-field"><label>Email</label><input type="email" id="r-email" placeholder="votre@email.com"/></div>
+      <div class="auth-field"><label>Mot de passe</label><input type="password" id="r-pass" placeholder="Minimum 6 caractères"/></div>
+      <div class="auth-err" id="r-err">Cet email existe déjà.</div>
+      <button class="auth-btn" onclick="doRegister()">Créer mon compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE HOME ═══════════ -->
+<div id="page-home" class="page active">
+  <div class="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-content">
+      <h1 class="hero-title">BARECO<br><span>La comptabilité qui s'écrit toute seule</span></h1>
+      <p class="hero-sub">Saisissez vos factures et opérations — Journal, Grand Livre, Bilan et CPC générés automatiquement.</p>
+      <div class="hero-cta">
+        <button class="btn-red" onclick="requireAuth(()=>gotoSaisie('tab-facture'))">🧾 Nouvelle Facture</button>
+        <button class="btn-ghost" onclick="showPage('pcm')">📖 Plan Comptable</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD (visible si connecté et données) -->
+  <div id="home-dashboard" style="display:none;">
+    <div class="dash-section">
+
+      <!-- Actions rapides -->
+      <div class="dash-title">Actions rapides</div>
+      <div class="dash-actions">
+        <button class="dash-action-btn" onclick="gotoSaisie('tab-facture')"><span class="dab-icon">🧾</span> Nouvelle Facture</button>
+        <button class="dash-action-btn" onclick="gotoSaisie('tab-ops')"><span class="dab-icon">⚙️</span> Opération diverse</button>
+        <button class="dash-action-btn" onclick="gotoSaisie('tab-jmanuel')"><span class="dab-icon">✏️</span> Écriture manuelle</button>
+        <button class="dash-action-btn" onclick="showPage('journal')"><span class="dab-icon">📋</span> Voir Journal</button>
+        <button class="dash-action-btn" onclick="printBilan()"><span class="dab-icon">🖨️</span> Imprimer Bilan</button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="dash-title">Situation financière</div>
+      <div class="kpi-grid" id="dash-kpis"></div>
+
+      <!-- 2 colonnes : dernières écritures + répartition charges/produits -->
+      <div class="dash-grid2">
+        <div class="dash-card">
+          <div class="dash-card-title">
+            <span>📋 Dernières écritures</span>
+            <a onclick="showPage('journal')">Voir tout →</a>
+          </div>
+          <div id="dash-ecritures"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">
+            <span>📊 Répartition des comptes</span>
+            <a onclick="showPage('grandlivre')">Grand Livre →</a>
+          </div>
+          <div id="dash-repartition"></div>
+        </div>
+      </div>
+
+      <!-- Bilan résumé + CPC résumé -->
+      <div class="dash-grid2">
+        <div class="dash-card">
+          <div class="dash-card-title">
+            <span>📊 Bilan résumé</span>
+            <a onclick="showPage('bilan')">Bilan complet →</a>
+          </div>
+          <div id="dash-bilan"></div>
+        </div>
+        <div class="dash-card">
+          <div class="dash-card-title">
+            <span>💰 CPC résumé</span>
+            <a onclick="showPage('cpc')">CPC complet →</a>
+          </div>
+          <div id="dash-cpc"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Modules (visible si non connecté ou pas de données) -->
+  <div id="home-modules">
+    <section class="flow-section">
+      <h2 class="flow-title">Flux <span>automatique</span></h2>
+      <div class="flow-steps">
+        <div class="flow-step" onclick="requireAuth(()=>gotoSaisie('tab-facture'))"><div class="fi">🧾</div><div class="fl">Facture / Opération</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" onclick="requireAuth(()=>showPage('journal'))"><div class="fi">📋</div><div class="fl">Journal</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" onclick="requireAuth(()=>showPage('grandlivre'))"><div class="fi">📒</div><div class="fl">Grand Livre</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" onclick="requireAuth(()=>showPage('bilan'))"><div class="fi">📊</div><div class="fl">Bilan</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-step" onclick="requireAuth(()=>showPage('cpc'))"><div class="fi">💰</div><div class="fl">CPC</div></div>
+      </div>
+    </section>
+    <section class="modules-section">
+      <h2 class="modules-title">Nos <span>Modules</span></h2>
+      <div class="modules-grid">
+        <div class="mod-card" onclick="requireAuth(()=>gotoSaisie('tab-facture'))"><div class="mi">🧾</div><div class="mt">Facture</div><div class="md">Vente & Achat avec TVA</div></div>
+        <div class="mod-card" onclick="requireAuth(()=>gotoSaisie('tab-ops'))"><div class="mi">⚙️</div><div class="mt">Opérations</div><div class="md">Capital, emprunt, immobilisation…</div></div>
+        <div class="mod-card" onclick="requireAuth(()=>gotoSaisie('tab-jmanuel'))"><div class="mi">✏️</div><div class="mt">Journal Manuel</div><div class="md">Écriture libre avec PCM</div></div>
+        <div class="mod-card" onclick="requireAuth(()=>showPage('bilan'))"><div class="mi">📊</div><div class="mt">Bilan</div><div class="md">Situation patrimoniale automatique</div></div>
+        <div class="mod-card" onclick="requireAuth(()=>showPage('cpc'))"><div class="mi">💰</div><div class="mt">CPC</div><div class="md">Produits & Charges</div></div>
+        <div class="mod-card" onclick="showPage('pcm')"><div class="mi">📖</div><div class="mt">Plan Comptable</div><div class="md">PCM complet avec recherche</div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE SAISIE ═══════════ -->
+<div id="page-saisie" class="page">
+  <div class="inner">
+    <div class="bc"><a onclick="showPage('home')">🏠 Accueil</a><span class="bc-sep">›</span><span style="font-weight:700;color:var(--text);">Saisie</span></div>
+    <div class="ph"><div class="phi">✏️</div><div><h1>Saisie Comptable</h1><p>Factures, opérations diverses ou écriture manuelle</p></div></div>
+    <div class="card">
+      <div style="padding:20px 28px 0;">
+        <div class="tabs">
+          <button class="tab-btn active" id="tab-facture" onclick="switchTab('facture')">🧾 Facture</button>
+          <button class="tab-btn" id="tab-ops" onclick="switchTab('ops')">⚙️ Opération diverse</button>
+          <button class="tab-btn" id="tab-jmanuel" onclick="switchTab('jmanuel')">✏️ Journal Manuel</button>
+        </div>
+      </div>
+
+      <!-- ── TAB FACTURE ── -->
+      <div class="tab-pane active" id="pane-facture">
+        <div class="fac-hdr">
+          <div>
+            <span class="fh-lbl">FACTURE À</span><div class="fh-v">Émetteur</div>
+            <input class="fh-i" type="text" id="fac-from" placeholder="Nom de société (émetteur)"/>
+            <input class="fh-i" type="text" id="fac-adr-from" placeholder="Adresse"/>
+          </div>
+          <div style="text-align:right;">
+            <span class="fh-lbl">DATE</span>
+            <input class="fh-i r" type="date" id="fac-date"/>
+            <span class="fh-lbl" style="margin-top:9px;">FACTURE N°</span>
+            <input class="fh-i r" type="text" id="fac-num" placeholder="FAC-001"/>
+          </div>
+        </div>
+        <div class="fac-envoi">
+          <div>
+            <span class="env-lbl">ENVOYER À</span>
+            <input class="env-i" type="text" id="fac-to" placeholder="Nom société destinataire"/>
+            <input class="env-i" type="text" id="fac-adr-to" placeholder="Adresse"/>
+          </div>
+          <div>
+            <span class="env-lbl">TYPE DE FACTURE</span>
+            <select class="env-s" id="fac-type" onchange="onFacTypeChange()">
+              <option value="vente">Facture de Vente (Client)</option>
+              <option value="achat">Facture d'Achat</option>
+            </select>
+          </div>
+        </div>
+        <!-- Choix Achat: Charge ou Immobilisation (visible seulement si achat) -->
+        <div id="achat-type-zone" style="display:none;padding:10px 28px 0;">
+          <p style="font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;">Nature de l'achat :</p>
+          <div class="achat-type-row">
+            <div class="achat-type-btn sel" data-at="charge" onclick="selectAchatType(this)">
+              <div class="atb-icon">📦</div>Charge / Marchandise<br/><small style="font-weight:400;color:var(--muted);">Compte 6xxx</small>
+            </div>
+            <div class="achat-type-btn" data-at="immo" onclick="selectAchatType(this)">
+              <div class="atb-icon">🏗️</div>Immobilisation<br/><small style="font-weight:400;color:var(--muted);">Compte 2xxx</small>
+            </div>
+          </div>
+        </div>
+        <!-- Nature immobilisation (visible si achat immo) -->
+        <div class="immo-nature-row" id="immo-nature-zone">
+          <label>🏗️ Nature du bien immobilisé → Compte automatique</label>
+          <select id="immo-nature-sel" onchange="onImmoNatureChange()">
+            <option value="2311">Terrains (2311)</option>
+            <option value="2321">Constructions (2321)</option>
+            <option value="2331">Installations techniques (2331)</option>
+            <option value="2340">Matériel de transport (2340)</option>
+            <option value="2350">Matériel de bureau (2350)</option>
+            <option value="2355">Mobilier (2355)</option>
+            <option value="2360">Matériel informatique (2360)</option>
+            <option value="2210">Brevets & licences (2210)</option>
+          </select>
+          <div class="immo-compte-badge" id="immo-compte-badge">→ Compte : <strong>2340 – Matériel de transport</strong></div>
+        </div>
+
+        <!-- Contrepartie pour achat immobilisation -->
+        <div class="immo-nature-row" id="immo-contre-zone" style="background:#f0f6ff;border-color:var(--blue);margin-top:0;">
+          <label style="color:var(--blue);">💳 Compte de contrepartie (paiement)</label>
+          <div style="position:relative;">
+            <input type="text" id="immo-contre-inp" placeholder="Ex: 4411 Fournisseurs, 5141 Banques…"
+              oninput="onImmoContreInput(this)" onfocus="onImmoContreInput(this)" onblur="hideImmoContre()"
+              style="width:100%;border:1.5px solid var(--blue);border-radius:7px;padding:7px 11px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;background:#fff;"/>
+            <input type="hidden" id="immo-contre-num" value="4411"/>
+            <input type="hidden" id="immo-contre-nom" value="Fournisseurs immobilisations"/>
+            <div id="immo-contre-dd" class="pcm-dropdown"></div>
+          </div>
+        </div>
+        <div class="lines-zone">
+          <table class="lt">
+            <thead><tr>
+              <th style="width:68px">QTÉ</th><th>DÉSIGNATION</th>
+              <th style="width:120px">PRIX UNIT HT</th><th style="width:120px">MONTANT HT</th>
+              <th style="width:34px"></th>
+            </tr></thead>
+            <tbody id="lines-body">
+              <tr>
+                <td><input type="number" class="qty" min="0" value="1" oninput="calcLine(this)"/></td>
+                <td class="des-td"><input type="text" class="des-input" placeholder="Description du produit / service"/></td>
+                <td><input type="number" class="pux" min="0" value="0" oninput="calcLine(this)"/></td>
+                <td><input type="number" class="mht" readonly/></td>
+                <td><button class="del-btn" onclick="delLine(this)">✕</button></td>
+              </tr>
+            </tbody>
+          </table>
+          <button class="add-line-btn" onclick="addLine()">+ Ajouter une ligne</button>
+        </div>
+        <div class="tva-row">
+          <span>Taux TVA :</span>
+          <select id="tva-rate" onchange="calcTotaux()">
+            <option value="20">20%</option><option value="14">14%</option>
+            <option value="10">10%</option><option value="7">7%</option>
+            <option value="0">0% – Exonéré</option>
+          </select>
+        </div>
+        <div class="totaux">
+          <div class="tot-box">
+            <div class="tot-row ht"><span>TOTAL HT</span><span id="tot-ht">0.00</span></div>
+            <div class="tot-row tva-r"><span>TVA (<span id="tva-pct">20</span>%)</span><span id="tot-tva">0.00</span></div>
+            <div class="tot-row ttc"><span>TOTAL TTC</span><span id="tot-ttc">0.00</span></div>
+          </div>
+        </div>
+        <div class="fac-footer">
+          <button class="btn-enreg" onclick="enregistrerFacture()">✅ Enregistrer & Comptabiliser</button>
+          <button class="btn-reset" onclick="resetFacture()">🗑 Réinitialiser</button>
+        </div>
+      </div>
+
+      <!-- ── TAB OPERATIONS ── -->
+      <div class="tab-pane" id="pane-ops">
+        <div style="padding:22px 28px 26px;">
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Opérations ne passant pas par une facture : capital, emprunt, amortissement, etc.</p>
+          <div class="op-type-grid" id="op-type-cards">
+            <div class="op-card sel" data-op="capital" onclick="selectOp(this)"><div class="oci">🏦</div><div class="ocl">Capital</div><div class="ocs">Apport numéraire</div></div>
+            <div class="op-card" data-op="emprunt" onclick="selectOp(this)"><div class="oci">💳</div><div class="ocl">Emprunt</div><div class="ocs">Bancaire</div></div>
+            <div class="op-card" data-op="immo" onclick="selectOp(this)"><div class="oci">🏗️</div><div class="ocl">Immobilisation</div><div class="ocs">Achat actif fixe</div></div>
+            <div class="op-card" data-op="amort" onclick="selectOp(this)"><div class="oci">📉</div><div class="ocl">Amortissement</div><div class="ocs">Dotation annuelle</div></div>
+            <div class="op-card" data-op="banque" onclick="selectOp(this)"><div class="oci">🏧</div><div class="ocl">Banque</div><div class="ocs">Virement</div></div>
+            <div class="op-card" data-op="caisse" onclick="selectOp(this)"><div class="oci">💵</div><div class="ocl">Caisse</div><div class="ocs">Espèces</div></div>
+            <div class="op-card" data-op="charge" onclick="selectOp(this)"><div class="oci">📋</div><div class="ocl">Charge diverse</div><div class="ocs">Loyer, salaire…</div></div>
+          </div>
+          <div class="op-zone"><div class="op-zone-title" id="op-zone-title">🏦 Apport en Capital</div><div id="op-fields"></div></div>
+          <div class="grid2"><div class="fg"><label>Date</label><input type="date" id="op-date"/></div><div class="fg"><label>Référence / N° pièce</label><input type="text" id="op-ref" placeholder="OD-001"/></div></div>
+          <div class="fg" style="margin-bottom:16px;"><label>Libellé</label><input type="text" id="op-lib" placeholder="Description de l'opération"/></div>
+          <div class="preview-zone"><div class="preview-title">👁 Aperçu écriture en partie double</div><div id="op-preview"></div></div>
+          <div style="display:flex;gap:11px;">
+            <button class="btn-enreg" onclick="enregistrerOperation()">✅ Enregistrer</button>
+            <button class="btn-reset" onclick="resetOps()">🗑 Réinitialiser</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── TAB JOURNAL MANUEL ── -->
+      <div class="tab-pane" id="pane-jmanuel">
+        <div style="padding:22px 28px 26px;">
+          <p style="font-size:12.5px;color:var(--muted);margin-bottom:16px;">Saisissez librement vos écritures. Entrez le numéro de compte pour voir les suggestions du Plan Comptable Marocain.</p>
+          <div class="grid2" style="margin-bottom:14px;">
+            <div class="fg"><label>Date</label><input type="date" id="jm-date"/></div>
+            <div class="fg"><label>Référence / N° pièce</label><input type="text" id="jm-ref" placeholder="OD-001"/></div>
+          </div>
+          <div class="fg" style="margin-bottom:14px;"><label>Libellé général</label><input type="text" id="jm-lib" placeholder="Description de l'écriture"/></div>
+          <div class="jm-entry">
+            <div style="display:grid;grid-template-columns:30px 110px 1fr 120px 120px 30px;background:var(--bg);border-bottom:1.5px solid var(--border);font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;">
+              <div style="padding:8px 4px;text-align:center;">Sens</div>
+              <div style="padding:8px 11px;">N° Compte</div>
+              <div style="padding:8px 11px;">Libellé du compte</div>
+              <div style="padding:8px 11px;text-align:right;color:var(--red);">Débit</div>
+              <div style="padding:8px 11px;text-align:right;color:var(--blue);">Crédit</div>
+              <div></div>
+            </div>
+            <div id="jm-body"></div>
+          </div>
+          <div style="display:flex;gap:10px;margin-bottom:16px;">
+            <button class="add-jm-row-btn" onclick="addJMRow('D')">+ Ligne Débit</button>
+            <button class="add-jm-row-btn" onclick="addJMRow('C')">+ Ligne Crédit</button>
+          </div>
+          <div id="jm-balance" style="font-size:12px;font-weight:700;text-align:right;margin-bottom:14px;color:var(--muted);"></div>
+          <div style="display:flex;gap:11px;">
+            <button class="btn-enreg" onclick="enregistrerJManuel()">✅ Enregistrer l'écriture</button>
+            <button class="btn-reset" onclick="resetJManuel()">🗑 Réinitialiser</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE JOURNAL ═══════════ -->
+<div id="page-journal" class="page">
+  <div class="inner">
+    <div class="bc"><a onclick="showPage('home')">🏠 Accueil</a><span class="bc-sep">›</span><span style="font-weight:700;color:var(--text);">Journal</span></div>
+    <div class="ph"><div class="phi">📋</div><div><h1>Journal Comptable</h1><p>Toutes les écritures générées automatiquement.</p></div>
+      <button onclick="printEtat('journal-print-zone','Journal Comptable')" style="margin-left:auto;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;font-weight:700;font-size:12px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;display:flex;align-items:center;gap:6px;">🖨️ Imprimer / PDF</button></div>
+    <div id="journal-stats" class="stats-bar" style="display:none;"></div>
+    <div class="card card-p" id="journal-print-zone">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <h2 style="font-size:17px;font-weight:800;">Journal — Exercice comptable</h2>
+        <button class="btn-clear" onclick="clearAll()">🗑 Tout effacer</button>
+      </div>
+      <div id="journal-content"><div class="j-empty"><div class="jei">📋</div><p>Aucune écriture.<br/><a onclick="gotoSaisie('tab-facture')">Saisissez votre première opération</a></p></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE GRAND LIVRE ═══════════ -->
+<div id="page-grandlivre" class="page">
+  <div class="inner">
+    <div class="bc"><a onclick="showPage('home')">🏠 Accueil</a><span class="bc-sep">›</span><span style="font-weight:700;color:var(--text);">Grand Livre</span></div>
+    <div class="ph"><div class="phi">📒</div><div><h1>Grand Livre</h1><p>Soldes débiteurs et créditeurs par compte.</p></div>
+      <button onclick="printEtat('gl-print-zone','Grand Livre')" style="margin-left:auto;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;font-weight:700;font-size:12px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;display:flex;align-items:center;gap:6px;">🖨️ Imprimer / PDF</button></div>
+    <div id="gl-print-zone"><div id="gl-content"><div class="j-empty"><div class="jei">📒</div><p>Aucun compte.<br/><a onclick="gotoSaisie('tab-facture')">Saisissez une opération</a></p></div></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE BILAN ═══════════ -->
+<div id="page-bilan" class="page">
+  <div class="inner">
+    <div class="bc"><a onclick="showPage('home')">🏠 Accueil</a><span class="bc-sep">›</span><span style="font-weight:700;color:var(--text);">Bilan</span></div>
+    <div class="ph"><div class="phi">📊</div><div><h1>Bilan Comptable</h1><p>Situation patrimoniale automatique.</p></div>
+      <button onclick="printEtat('bilan-print-zone','Bilan Comptable')" style="margin-left:auto;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;font-weight:700;font-size:12px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;display:flex;align-items:center;gap:6px;">🖨️ Imprimer / PDF</button></div>
+    <div id="bilan-print-zone"><div id="bilan-wrap"></div></div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE CPC ═══════════ -->
+<div id="page-cpc" class="page">
+  <div class="inner">
+    <div class="bc"><a onclick="showPage('home')">🏠 Accueil</a><span class="bc-sep">›</span><span style="font-weight:700;color:var(--text);">CPC</span></div>
+    <div class="ph"><div class="phi">💰</div><div><h1>Compte de Produits et Charges</h1><p>Résultat de l'exercice.</p></div>
+      <button onclick="printEtat('cpc-wrap','Compte de Produits et Charges')" style="margin-left:auto;background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;font-weight:700;font-size:12px;padding:9px 18px;border-radius:8px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;display:flex;align-items:center;gap:6px;">🖨️ Imprimer / PDF</button></div>
+    <div class="card card-p" id="cpc-wrap"><p style="text-align:center;color:var(--muted);padding:30px 0;">Saisissez des opérations pour calculer le CPC.</p></div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE FISCALITE ═══════════ -->
+<div id="page-fiscalite" class="page">
+  <div class="inner">
+    <div class="bc"><a onclick="showPage('home')">🏠 Accueil</a><span class="bc-sep">›</span><span style="font-weight:700;color:var(--text);">Fiscalité</span></div>
+    <div class="card">
+      <div class="fisc-hero"><h2>🏛️ Fiscalité Marocaine</h2><p>Informations, barèmes et calculatrices — IS, TVA, IR selon le droit fiscal marocain en vigueur.</p></div>
+      <div class="fisc-tabs">
+        <button class="fisc-tab active" id="fisc-tab-is" onclick="switchFisc('is')">🏛️ IS</button>
+        <button class="fisc-tab" id="fisc-tab-tva" onclick="switchFisc('tva')">📄 TVA</button>
+        <button class="fisc-tab" id="fisc-tab-ir" onclick="switchFisc('ir')">👤 IR</button>
+      </div>
+      <div class="fisc-pane active" id="fisc-pane-is">
+        <div class="info-h3">📌 Qu'est-ce que l'IS ?</div>
+        <p class="info-p">L'<strong>Impôt sur les Sociétés (IS)</strong> frappe les bénéfices des personnes morales (SA, SARL, SNC…) ayant leur siège social au Maroc. Il est régi par le Code Général des Impôts (CGI).</p>
+        <div class="info-box blue"><strong>Base de calcul</strong>Résultat fiscal = Résultat comptable + Réintégrations − Déductions fiscales</div>
+        <div class="info-h3">📊 Barème IS 2024</div>
+        <table class="bareme-tbl">
+          <thead><tr><th>Tranche bénéfice net fiscal (MAD)</th><th>Taux IS</th><th>Remarque</th></tr></thead>
+          <tbody>
+            <tr><td>≤ 300 000</td><td><strong>10%</strong></td><td>PME / Petites entreprises</td></tr>
+            <tr><td>300 001 – 1 000 000</td><td><strong>20%</strong></td><td>Taux intermédiaire</td></tr>
+            <tr><td>1 000 001 – 100 000 000</td><td><strong>31%</strong></td><td>Taux normal</td></tr>
+            <tr><td>> 100 000 000</td><td><strong>33%</strong></td><td>Grandes entreprises</td></tr>
+          </tbody>
+        </table>
+        <div class="info-box orange"><strong>⚠️ Cotisation Minimale (CM)</strong>CM = 0,5% du CA HT (minimum 3 000 MAD). IS à payer = max(IS théorique, CM).</div>
+        <div class="info-h3">🧮 Calculatrice IS</div>
+        <div class="calc-box">
+          <h4>🔢 Calculer l'IS à payer</h4>
+          <div class="calc-row"><label>Résultat comptable (MAD)</label><input type="number" id="is-rc" placeholder="500000" oninput="calcIS()"/></div>
+          <div class="calc-row"><label>+ Réintégrations</label><input type="number" id="is-reint" value="0" oninput="calcIS()"/></div>
+          <div class="calc-row"><label>− Déductions fiscales</label><input type="number" id="is-ded" value="0" oninput="calcIS()"/></div>
+          <div class="calc-row"><label>Chiffre d'affaires HT (pour CM)</label><input type="number" id="is-ca" placeholder="2000000" oninput="calcIS()"/></div>
+          <div class="calc-result" id="is-result" style="display:none;"></div>
+        </div>
+        <div class="info-h3">📅 Calendrier</div>
+        <ul style="font-size:12.5px;line-height:1.8;padding-left:20px;color:#333;">
+          <li>Déclaration : dans les 3 mois après clôture exercice</li>
+          <li>4 acomptes de 25% de l'IS N-1 (3e, 6e, 9e, 12e mois)</li>
+          <li>Régularisation lors de la déclaration annuelle</li>
+        </ul>
+      </div>
+      <div class="fisc-pane" id="fisc-pane-tva">
+        <div class="info-h3">📌 Qu'est-ce que la TVA ?</div>
+        <p class="info-p">La <strong>TVA</strong> est un impôt indirect sur la consommation. L'entreprise collecte la TVA sur ses ventes et récupère celle payée sur ses achats. Elle reverse la différence à l'État.</p>
+        <div class="info-box blue"><strong>Formule</strong>TVA à décaisser = TVA collectée (ventes) − TVA déductible (achats)</div>
+        <div class="info-h3">📊 Taux de TVA au Maroc</div>
+        <table class="bareme-tbl">
+          <thead><tr><th>Taux</th><th>Application principale</th></tr></thead>
+          <tbody>
+            <tr><td><strong>20%</strong> — Taux normal</td><td>Tous produits/services non visés par les taux réduits</td></tr>
+            <tr><td><strong>14%</strong></td><td>Transport voyageurs, électricité, beurre</td></tr>
+            <tr><td><strong>10%</strong></td><td>Banques, hôtellerie, restauration, eau, huiles alimentaires</td></tr>
+            <tr><td><strong>7%</strong></td><td>Produits de première nécessité (sucre, farine, médicaments)</td></tr>
+            <tr><td><strong>0% / Exonéré</strong></td><td>Exportations, produits alimentaires de base</td></tr>
+          </tbody>
+        </table>
+        <div class="info-h3">🧮 Calculatrice TVA</div>
+        <div class="calc-box">
+          <h4>🔢 HT ↔ TTC</h4>
+          <div class="calc-row"><label>Montant HT (MAD)</label><input type="number" id="tva-ht" placeholder="10000" oninput="calcTVAFisc()"/></div>
+          <div class="calc-row"><label>Taux TVA</label>
+            <select id="tva-taux" onchange="calcTVAFisc()" style="border:1.5px solid var(--border);border-radius:7px;padding:8px 11px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;">
+              <option value="20">20%</option><option value="14">14%</option><option value="10">10%</option><option value="7">7%</option>
+            </select>
+          </div>
+          <div class="calc-result" id="tva-result" style="display:none;"></div>
+        </div>
+        <div class="info-box green"><strong>✅ Crédit de TVA</strong>Si TVA déductible > TVA collectée → crédit reportable ou remboursable sous conditions.</div>
+      </div>
+      <div class="fisc-pane" id="fisc-pane-ir">
+        <div class="info-h3">📌 Qu'est-ce que l'IR ?</div>
+        <p class="info-p">L'<strong>IR</strong> frappe les revenus des personnes physiques. Il est progressif par tranches. Les salaires sont soumis à l'IR par voie de retenue à la source (RAS).</p>
+        <table class="bareme-tbl">
+          <thead><tr><th>Tranche revenu annuel (MAD)</th><th>Taux</th><th>Somme à déduire</th></tr></thead>
+          <tbody>
+            <tr><td>0 – 30 000</td><td><strong>0%</strong></td><td>0</td></tr>
+            <tr><td>30 001 – 50 000</td><td><strong>10%</strong></td><td>3 000</td></tr>
+            <tr><td>50 001 – 60 000</td><td><strong>20%</strong></td><td>8 000</td></tr>
+            <tr><td>60 001 – 80 000</td><td><strong>30%</strong></td><td>14 000</td></tr>
+            <tr><td>80 001 – 180 000</td><td><strong>34%</strong></td><td>17 200</td></tr>
+            <tr><td>> 180 000</td><td><strong>38%</strong></td><td>24 400</td></tr>
+          </tbody>
+        </table>
+        <div class="info-box orange"><strong>Déductions</strong>Frais professionnels : 20% salaire brut (plaf. 30 000 MAD/an). Cotisations CNSS + AMO déductibles.</div>
+        <div class="info-h3">🧮 Calculatrice IR Salaire</div>
+        <div class="calc-box">
+          <h4>🔢 Salaire net mensuel</h4>
+          <div class="calc-row"><label>Salaire brut mensuel (MAD)</label><input type="number" id="ir-brut" placeholder="8000" oninput="calcIR()"/></div>
+          <div class="calc-row"><label>Cotisations salariales/mois</label><input type="number" id="ir-cot" value="0" oninput="calcIR()"/></div>
+          <div class="calc-result" id="ir-result" style="display:none;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ PAGE PLAN COMPTABLE ═══════════ -->
+<div id="page-pcm" class="page">
+  <div class="inner">
+    <div class="bc"><a onclick="showPage('home')">🏠 Accueil</a><span class="bc-sep">›</span><span style="font-weight:700;color:var(--text);">Plan Comptable Marocain</span></div>
+    <div class="ph"><div class="phi">📖</div><div><h1>Plan Comptable Marocain</h1><p>Recherchez un compte par numéro ou par nom.</p></div></div>
+    <div class="card card-p">
+      <div class="pcm-search-box"><input type="text" id="pcm-search" placeholder="Rechercher un compte (ex: 3421, clients, banque…)" oninput="renderPCM()"/></div>
+      <div id="pcm-content"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════
+//  PLAN COMPTABLE MAROCAIN
+// ═══════════════════════════════════════
+const PCM=[
+  // CLASSE 1
+  {num:'1111',nom:'Capital social',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1119',nom:'Actionnaires, capital souscrit non appelé',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1121',nom:'Réserve légale',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1131',nom:'Réserves facultatives',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1151',nom:'Report à nouveau (solde créditeur)',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1161',nom:'Résultat net de l\'exercice (bénéfice)',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1162',nom:'Résultat net de l\'exercice (perte)',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1171',nom:'Dividendes',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1411',nom:'Emprunts obligataires',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1481',nom:'Autres dettes de financement',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1511',nom:'Provisions pour risques',classe:'Classe 1 — Comptes de financement permanent'},
+  {num:'1521',nom:'Provisions pour charges',classe:'Classe 1 — Comptes de financement permanent'},
+  // CLASSE 2
+  {num:'2110',nom:'Frais préliminaires',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2120',nom:'Charges à répartir sur plusieurs exercices',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2210',nom:'Brevets, marques, droits et licences',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2220',nom:'Fonds commercial',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2311',nom:'Terrains',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2321',nom:'Constructions',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2331',nom:'Installations techniques, agencements',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2340',nom:'Matériel de transport',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2350',nom:'Matériel de bureau et informatique',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2355',nom:'Mobilier',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2360',nom:'Matériel informatique',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2391',nom:'Immobilisations corporelles en cours',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2811',nom:'Amort. immobilisations en non-valeur',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2821',nom:'Amort. immobilisations incorporelles',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2831',nom:'Amort. terrains',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2832',nom:'Amort. constructions',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2833',nom:'Amort. installations techniques',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2834',nom:'Amort. matériel de transport',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  {num:'2835',nom:'Amort. matériel de bureau',classe:'Classe 2 — Comptes d\'actif immobilisé'},
+  // CLASSE 3
+  {num:'3111',nom:'Marchandises',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3121',nom:'Matières premières',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3131',nom:'Produits en cours',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3141',nom:'Produits finis',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3411',nom:'Clients — ventes de biens et services',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3421',nom:'Clients et comptes rattachés',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3431',nom:'Clients — effets à recevoir',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3441',nom:'Autres créances clients',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3451',nom:'Personnel — avances et acomptes',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3461',nom:'Associés — débiteurs',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3471',nom:'Débiteurs divers',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3481',nom:'Charges constatées d\'avance',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'3491',nom:'Provision pour dépréciation des créances',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'34511',nom:'État TVA récupérable sur immobilisations',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'34512',nom:'État TVA récupérable sur charges',classe:'Classe 3 — Comptes d\'actif circulant'},
+  {num:'34552',nom:'TVA récupérable sur achats',classe:'Classe 3 — Comptes d\'actif circulant'},
+  // CLASSE 4
+  {num:'4411',nom:'Fournisseurs et comptes rattachés',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4412',nom:'Fournisseurs — effets à payer',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4421',nom:'Personnel — rémunérations dues',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4431',nom:'Organismes sociaux',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4441',nom:'État — impôts et taxes',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4443',nom:'État — IS',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4455',nom:'TVA facturée',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4456',nom:'État — TVA à décaisser',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4471',nom:'Associés — créditeurs',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4481',nom:'Créditeurs divers',classe:'Classe 4 — Comptes de passif circulant'},
+  {num:'4491',nom:'Produits constatés d\'avance',classe:'Classe 4 — Comptes de passif circulant'},
+  // CLASSE 5
+  {num:'5141',nom:'Banques',classe:'Classe 5 — Comptes de trésorerie'},
+  {num:'5142',nom:'CCP — Compte courant postal',classe:'Classe 5 — Comptes de trésorerie'},
+  {num:'5143',nom:'Trésorerie Générale',classe:'Classe 5 — Comptes de trésorerie'},
+  {num:'5161',nom:'Caisse',classe:'Classe 5 — Comptes de trésorerie'},
+  {num:'5170',nom:'Régies d\'avances et accréditifs',classe:'Classe 5 — Comptes de trésorerie'},
+  {num:'5191',nom:'Crédits de trésorerie',classe:'Classe 5 — Comptes de trésorerie'},
+  {num:'5193',nom:'Banques — soldes créditeurs',classe:'Classe 5 — Comptes de trésorerie'},
+  // CLASSE 6
+  {num:'6111',nom:'Achats de marchandises',classe:'Classe 6 — Comptes de charges'},
+  {num:'6121',nom:'Achats de matières premières',classe:'Classe 6 — Comptes de charges'},
+  {num:'6131',nom:'Achats de fournitures non stockables',classe:'Classe 6 — Comptes de charges'},
+  {num:'6132',nom:'Loyers et charges locatives',classe:'Classe 6 — Comptes de charges'},
+  {num:'6133',nom:'Entretien et réparations',classe:'Classe 6 — Comptes de charges'},
+  {num:'6134',nom:'Primes d\'assurance',classe:'Classe 6 — Comptes de charges'},
+  {num:'6141',nom:'Publicité et relations publiques',classe:'Classe 6 — Comptes de charges'},
+  {num:'6142',nom:'Transports et déplacements',classe:'Classe 6 — Comptes de charges'},
+  {num:'6155',nom:'Honoraires',classe:'Classe 6 — Comptes de charges'},
+  {num:'6171',nom:'Charges de personnel — salaires',classe:'Classe 6 — Comptes de charges'},
+  {num:'6174',nom:'Charges sociales patronales',classe:'Classe 6 — Comptes de charges'},
+  {num:'6182',nom:'Pertes sur créances irrécouvrables',classe:'Classe 6 — Comptes de charges'},
+  {num:'6193',nom:'Dotations aux amortissements (immo. corp.)',classe:'Classe 6 — Comptes de charges'},
+  {num:'6194',nom:'Dotations aux amortissements (immo. incorp.)',classe:'Classe 6 — Comptes de charges'},
+  {num:'6196',nom:'Dotations aux provisions',classe:'Classe 6 — Comptes de charges'},
+  {num:'6199',nom:'Autres charges diverses',classe:'Classe 6 — Comptes de charges'},
+  {num:'6310',nom:'Impôts sur les bénéfices (IS)',classe:'Classe 6 — Comptes de charges'},
+  // CLASSE 7
+  {num:'7111',nom:'Ventes de marchandises',classe:'Classe 7 — Comptes de produits'},
+  {num:'7121',nom:'Ventes de biens produits',classe:'Classe 7 — Comptes de produits'},
+  {num:'7131',nom:'Ventes de travaux',classe:'Classe 7 — Comptes de produits'},
+  {num:'7141',nom:'Ventes de services',classe:'Classe 7 — Comptes de produits'},
+  {num:'7151',nom:'Produits accessoires',classe:'Classe 7 — Comptes de produits'},
+  {num:'7161',nom:'Subventions d\'exploitation reçues',classe:'Classe 7 — Comptes de produits'},
+  {num:'7181',nom:'Produits divers d\'exploitation',classe:'Classe 7 — Comptes de produits'},
+  {num:'7193',nom:'Reprises sur amortissements',classe:'Classe 7 — Comptes de produits'},
+  {num:'7196',nom:'Reprises sur provisions',classe:'Classe 7 — Comptes de produits'},
+  {num:'7311',nom:'Produits des titres de participation',classe:'Classe 7 — Comptes de produits'},
+  {num:'7381',nom:'Gains de change',classe:'Classe 7 — Comptes de produits'},
+];
+
+// ═══════════════════════════════════════
+//  AUTH SYSTEM
+// ═══════════════════════════════════════
+let currentUser=null;
+
+function getUsers(){return JSON.parse(localStorage.getItem('bareco_users')||'[]');}
+function saveUsers(u){localStorage.setItem('bareco_users',JSON.stringify(u));}
+function getUserDB(email){return JSON.parse(localStorage.getItem('bareco_db_'+email)||'{"ecritures":[]}');}
+function saveUserDB(email,db){localStorage.setItem('bareco_db_'+email,JSON.stringify(db));}
+
+function openAuth(tab){
+  document.getElementById('auth-overlay').style.display='flex';
+  switchAuthTab(tab);
+}
+function closeAuth(){document.getElementById('auth-overlay').style.display='none';}
+function switchAuthTab(t){
+  ['login','register'].forEach(x=>{
+    document.getElementById('at-'+x).classList.toggle('active',x===t);
+    document.getElementById('ap-'+x).classList.toggle('active',x===t);
+  });
+}
+function doLogin(){
+  const email=document.getElementById('l-email').value.trim().toLowerCase();
+  const pass=document.getElementById('l-pass').value;
+  const err=document.getElementById('l-err');
+  err.style.display='none';
+  const users=getUsers();
+  const u=users.find(x=>x.email===email&&x.pass===pass);
+  if(!u){err.style.display='block';return;}
+  currentUser=u;
+  DB=getUserDB(email);
+  updateNavUser();
+  closeAuth();
+  renderDashboard();
+  showToast('👋 Bienvenue, '+u.prenom+' !');
+}
+function doRegister(){
+  const prenom=document.getElementById('r-prenom').value.trim();
+  const nom=document.getElementById('r-nom').value.trim();
+  const societe=document.getElementById('r-societe').value.trim();
+  const email=document.getElementById('r-email').value.trim().toLowerCase();
+  const pass=document.getElementById('r-pass').value;
+  const err=document.getElementById('r-err');
+  err.style.display='none';
+  if(!prenom||!email||pass.length<6){err.textContent='Remplissez tous les champs (6 car. min pour le mot de passe).';err.style.display='block';return;}
+  const users=getUsers();
+  if(users.find(x=>x.email===email)){err.textContent='Cet email est déjà utilisé.';err.style.display='block';return;}
+  const u={prenom,nom,societe,email,pass};
+  users.push(u);saveUsers(users);
+  currentUser=u;DB={ecritures:[]};saveUserDB(email,DB);
+  updateNavUser();closeAuth();
+  renderDashboard();
+  showToast('🎉 Compte créé ! Bienvenue '+prenom+' !');
+}
+function doLogout(){currentUser=null;DB={ecritures:[]};updateNavUser();showPage('home');showToast('👋 Déconnecté.');}
+function updateNavUser(){
+  const r=document.getElementById('nav-right');
+  if(currentUser){
+    r.innerHTML=`<div class="nav-user-btn">👤 ${currentUser.prenom} ${currentUser.nom} <span style="opacity:.6;margin-left:4px;">(${currentUser.societe||''})</span></div>
+    <button class="nav-logout" onclick="doLogout()">Déconnexion</button>`;
+  } else {
+    r.innerHTML=`<button class="nav-reg" onclick="openAuth('login')">Se connecter</button>
+    <button class="nav-reg" style="background:linear-gradient(135deg,var(--teal),#0a6b62);border-color:#2dd4bf;" onclick="openAuth('register')">S'inscrire</button>`;
+  }
+}
+function requireAuth(fn){if(!currentUser){openAuth('login');return;}fn();}
+
+// ═══════════════════════════════════════
+//  DB
+// ═══════════════════════════════════════
+let DB={ecritures:[]};
+function saveDB(){if(currentUser)saveUserDB(currentUser.email,DB);}
+
+// ═══════════════════════════════════════
+//  NAV
+// ═══════════════════════════════════════
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+  closeAllDD();
+  if(name==='journal') renderJournal();
+  if(name==='grandlivre') renderGL();
+  if(name==='bilan') renderBilan();
+  if(name==='cpc') renderCPC();
+  if(name==='pcm') renderPCM();
+  if(name==='home') renderDashboard();
+}
+function gotoSaisie(tab){
+  if(!currentUser){openAuth('login');return;}
+  showPage('saisie');
+  switchTab(tab.replace('tab-',''));
+}
+function gotoFisc(id){showPage('fiscalite');switchFisc(id);}
+function toggleDD(id){const el=document.getElementById(id);const was=el.classList.contains('open');closeAllDD();if(!was)el.classList.add('open');}
+function closeAllDD(){document.querySelectorAll('.nav-item.open').forEach(e=>e.classList.remove('open'));}
+document.addEventListener('click',e=>{if(!e.target.closest('.nav-item'))closeAllDD();});
+document.getElementById('auth-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('auth-overlay'))closeAuth();});
+
+// ═══════════════════════════════════════
+//  TABS
+// ═══════════════════════════════════════
+function switchTab(id){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById('pane-'+id).classList.add('active');
+}
+function switchFisc(id){
+  document.querySelectorAll('.fisc-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.fisc-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('fisc-tab-'+id).classList.add('active');
+  document.getElementById('fisc-pane-'+id).classList.add('active');
+}
+
+// ═══════════════════════════════════════
+//  FACTURE
+// ═══════════════════════════════════════
+let achatType='charge';
+
+function onFacTypeChange(){
+  const t=document.getElementById('fac-type').value;
+  document.getElementById('achat-type-zone').style.display=t==='achat'?'block':'none';
+  document.getElementById('immo-nature-zone').style.display=(t==='achat'&&achatType==='immo')?'block':'none';
+}
+function selectAchatType(el){
+  document.querySelectorAll('.achat-type-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  achatType=el.dataset.at;
+  document.getElementById('immo-nature-zone').style.display=achatType==='immo'?'block':'none';
+  document.getElementById('immo-contre-zone').style.display=achatType==='immo'?'block':'none';
+  if(achatType==='immo') onImmoNatureChange();
+}
+function onImmoContreInput(inp){
+  const q=inp.value.trim();
+  const dd=document.getElementById('immo-contre-dd');
+  if(q.length<1){dd.style.display='none';return;}
+  const res=PCM.filter(c=>c.num.startsWith(q)||c.nom.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  if(!res.length){dd.style.display='none';return;}
+  dd.innerHTML=res.map(c=>`<div class="pcm-item" onmousedown="selectImmoContre('${c.num}','${c.nom.replace(/'/g,"\\'")}')"><span class="pcm-num">${c.num}</span><span class="pcm-nom">${c.nom}</span></div>`).join('');
+  dd.style.display='block';
+}
+function selectImmoContre(num,nom){
+  document.getElementById('immo-contre-inp').value=num+' – '+nom;
+  document.getElementById('immo-contre-num').value=num;
+  document.getElementById('immo-contre-nom').value=nom;
+  document.getElementById('immo-contre-dd').style.display='none';
+}
+function hideImmoContre(){setTimeout(()=>{const dd=document.getElementById('immo-contre-dd');if(dd)dd.style.display='none';},150);}
+const IMMO_NOMS={
+  '2311':'Terrains','2321':'Constructions','2331':'Installations techniques',
+  '2340':'Matériel de transport','2350':'Matériel de bureau','2355':'Mobilier',
+  '2360':'Matériel informatique','2210':'Brevets & licences'
+};
+function onImmoNatureChange(){
+  const v=document.getElementById('immo-nature-sel').value;
+  document.getElementById('immo-compte-badge').innerHTML=`→ Compte : <strong>${v} – ${IMMO_NOMS[v]||v}</strong>`;
+}
+function calcLine(inp){
+  const tr=inp.closest('tr');
+  const q=parseFloat(tr.querySelector('.qty').value)||0;
+  const p=parseFloat(tr.querySelector('.pux').value)||0;
+  tr.querySelector('.mht').value=(q*p).toFixed(2);
+  calcTotaux();
+}
+function calcTotaux(){
+  let ht=0;document.querySelectorAll('.mht').forEach(i=>ht+=parseFloat(i.value)||0);
+  const r=parseInt(document.getElementById('tva-rate').value)||0;
+  const tva=ht*r/100;
+  document.getElementById('tot-ht').textContent=ht.toFixed(2);
+  document.getElementById('tot-tva').textContent=tva.toFixed(2);
+  document.getElementById('tot-ttc').textContent=(ht+tva).toFixed(2);
+  document.getElementById('tva-pct').textContent=r;
+}
+function addLine(){
+  const tb=document.getElementById('lines-body');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><input type="number" class="qty" min="0" value="1" oninput="calcLine(this)"/></td>
+    <td class="des-td"><input type="text" class="des-input" placeholder="Description"/></td>
+    <td><input type="number" class="pux" min="0" value="0" oninput="calcLine(this)"/></td>
+    <td><input type="number" class="mht" readonly/></td>
+    <td><button class="del-btn" onclick="delLine(this)">✕</button></td>`;
+  tb.appendChild(tr);
+}
+function delLine(btn){if(document.querySelectorAll('#lines-body tr').length>1)btn.closest('tr').remove();calcTotaux();}
+function resetFacture(){
+  ['fac-from','fac-adr-from','fac-to','fac-adr-to'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('fac-date').value=today();autoFacNum();
+  document.getElementById('lines-body').innerHTML=`<tr>
+    <td><input type="number" class="qty" min="0" value="1" oninput="calcLine(this)"/></td>
+    <td class="des-td"><input type="text" class="des-input" placeholder="Description du produit / service"/></td>
+    <td><input type="number" class="pux" min="0" value="0" oninput="calcLine(this)"/></td>
+    <td><input type="number" class="mht" readonly/></td>
+    <td><button class="del-btn" onclick="delLine(this)">✕</button></td></tr>`;
+  calcTotaux();
+  achatType='charge';
+  document.getElementById('achat-type-zone').style.display='none';
+  document.getElementById('immo-nature-zone').style.display='none';
+  document.getElementById('immo-contre-zone').style.display='none';
+  document.getElementById('immo-contre-inp').value='';
+  document.getElementById('immo-contre-num').value='4411';
+  document.getElementById('immo-contre-nom').value='Fournisseurs immobilisations';
+  document.getElementById('fac-type').value='vente';
+  document.querySelectorAll('.achat-type-btn').forEach((b,i)=>b.classList.toggle('sel',i===0));
+}
+function enregistrerFacture(){
+  if(!currentUser){openAuth('login');return;}
+  const date=document.getElementById('fac-date').value;
+  const num=document.getElementById('fac-num').value.trim();
+  const type=document.getElementById('fac-type').value;
+  if(!date||!num){alert('Date et N° facture requis.');return;}
+  const ht=parseFloat(document.getElementById('tot-ht').textContent)||0;
+  const tva=parseFloat(document.getElementById('tot-tva').textContent)||0;
+  const ttc=parseFloat(document.getElementById('tot-ttc').textContent)||0;
+  if(ht<=0){alert('Montant HT doit être > 0.');return;}
+  const rate=parseInt(document.getElementById('tva-rate').value)||0;
+  let lignes=[];
+  if(type==='vente'){
+    lignes=[{num:'3421',nom:'Clients et comptes rattachés',sens:'D',montant:ttc},{num:'7111',nom:'Ventes de marchandises',sens:'C',montant:ht}];
+    if(tva>0) lignes.push({num:'4455',nom:'TVA facturée',sens:'C',montant:tva});
+  } else if(type==='achat'&&achatType==='immo'){
+    // Facture achat IMMOBILISATION — compte dynamique selon nature
+    const immoNum=document.getElementById('immo-nature-sel').value;
+    const immoNom=IMMO_NOMS[immoNum]||immoNum;
+    const cNum=document.getElementById('immo-contre-num')?.value||'4411';
+    const cNom=document.getElementById('immo-contre-nom')?.value||'Fournisseurs immobilisations';
+    lignes=[{num:immoNum,nom:immoNom,sens:'D',montant:ht}];
+    if(tva>0) lignes.push({num:'34511',nom:'TVA récupérable sur immobilisations',sens:'D',montant:tva});
+    lignes.push({num:cNum,nom:cNom,sens:'C',montant:ttc});
+  } else {
+    // Facture achat CHARGE
+    lignes=[{num:'6111',nom:'Achats de marchandises',sens:'D',montant:ht}];
+    if(tva>0) lignes.push({num:'34552',nom:'TVA récupérable sur achats',sens:'D',montant:tva});
+    lignes.push({num:'4411',nom:'Fournisseurs et comptes rattachés',sens:'C',montant:ttc});
+  }
+  const from=document.getElementById('fac-from').value||'Notre société';
+  const to=document.getElementById('fac-to').value||'Tiers';
+  DB.ecritures.push({id:Date.now(),date,ref:num,libelle:type==='vente'?`Vente – ${to}`:`Achat – ${from}`,type:'facture',soustype:type+(type==='achat'?'_'+achatType:''),lignes});
+  saveDB();showToast('✅ Facture '+num+' enregistrée !');resetFacture();
+  setTimeout(()=>{showPage('journal');renderDashboard();},1200);
+}
+
+// ═══════════════════════════════════════
+//  OPERATIONS DIVERSES
+// ═══════════════════════════════════════
+const OPS={
+  capital:{label:'🏦 Apport en Capital',
+    champs:[{id:'ov-montant',label:'Montant apporté (MAD)',type:'number',ph:'200000'}],
+    ecr:(v)=>[{num:'5141',nom:'Banques',sens:'D',montant:+v['ov-montant']},{num:'1111',nom:'Capital social',sens:'C',montant:+v['ov-montant']}]},
+  emprunt:{label:'💳 Emprunt Bancaire',
+    champs:[{id:'ov-montant',label:'Montant emprunté (MAD)',type:'number',ph:'500000'}],
+    ecr:(v)=>[{num:'5141',nom:'Banques',sens:'D',montant:+v['ov-montant']},{num:'1481',nom:'Autres dettes de financement',sens:'C',montant:+v['ov-montant']}]},
+  immo:{label:'🏗️ Achat Immobilisation',
+    champs:[
+      {id:'ov-nature',label:'Nature du bien',type:'select',opts:[{v:'2311',l:'Terrains (2311)'},{v:'2321',l:'Constructions (2321)'},{v:'2331',l:'Installations techniques (2331)'},{v:'2340',l:'Matériel de transport (2340)'},{v:'2350',l:'Matériel de bureau (2350)'},{v:'2355',l:'Mobilier (2355)'},{v:'2360',l:'Matériel informatique (2360)'}]},
+      {id:'ov-montant',label:'Montant HT (MAD)',type:'number',ph:'150000'},
+      {id:'ov-tva',label:'TVA (MAD)',type:'number',ph:'30000'},
+      {id:'ov-contre-immo',label:'Compte contrepartie (paiement)',type:'pcm',ph:'Ex: 4411 Fournisseurs, 5141 Banque…'}
+    ],
+    ecr:(v)=>{
+      const ht=+v['ov-montant'],tva=+v['ov-tva'];const nat=v['ov-nature']||'2340';
+      const cNum=v['ov-contre-immo-num']||'4411';const cNom=v['ov-contre-immo-nom']||'Fournisseurs immobilisations';
+      const lines=[{num:nat,nom:IMMO_NOMS[nat]||nat,sens:'D',montant:ht}];
+      if(tva>0)lines.push({num:'34511',nom:'TVA récup. sur immobilisations',sens:'D',montant:tva});
+      lines.push({num:cNum,nom:cNom,sens:'C',montant:ht+tva});return lines;}},
+  amort:{label:'📉 Dotation Amortissement',
+    champs:[
+      {id:'ov-nature-amort',label:'Immobilisation',type:'select',opts:[{v:'2834',l:'Mat. transport – 2834'},{v:'2832',l:'Constructions – 2832'},{v:'2835',l:'Mat. bureau – 2835'},{v:'2833',l:'Instal. techniques – 2833'},{v:'2821',l:'Immo. incorp. – 2821'}]},
+      {id:'ov-montant',label:'Dotation annuelle (MAD)',type:'number',ph:'15000'}
+    ],
+    ecr:(v)=>{const amortNum=v['ov-nature-amort']||'2834';return [{num:'6193',nom:'Dotations aux amortissements',sens:'D',montant:+v['ov-montant']},{num:amortNum,nom:'Amort. '+amortNum,sens:'C',montant:+v['ov-montant']}];}},
+  banque:{label:'🏧 Opération Bancaire',
+    champs:[
+      {id:'ov-sens-banque',label:'Sens du compte Banque',type:'select',opts:[{v:'D',l:'Débit Banque (entrée d\'argent)'},{v:'C',l:'Crédit Banque (sortie d\'argent)'}]},
+      {id:'ov-montant',label:'Montant (MAD)',type:'number',ph:'50000'},
+      {id:'ov-contre-banque',label:'Compte contrepartie',type:'pcm',ph:'Ex: 4411, 3421, 1481…'}
+    ],
+    ecr:(v)=>{
+      const m=+v['ov-montant'];const sens=v['ov-sens-banque']||'D';
+      const cNum=v['ov-contre-banque-num']||'4481';const cNom=v['ov-contre-banque-nom']||'Contrepartie';
+      return sens==='D'
+        ?[{num:'5141',nom:'Banques',sens:'D',montant:m},{num:cNum,nom:cNom,sens:'C',montant:m}]
+        :[{num:cNum,nom:cNom,sens:'D',montant:m},{num:'5141',nom:'Banques',sens:'C',montant:m}];
+    }},
+  caisse:{label:'💵 Opération Caisse',
+    champs:[
+      {id:'ov-sens-caisse',label:'Sens du compte Caisse',type:'select',opts:[{v:'D',l:'Débit Caisse (entrée espèces)'},{v:'C',l:'Crédit Caisse (sortie espèces)'}]},
+      {id:'ov-montant',label:'Montant (MAD)',type:'number',ph:'5000'},
+      {id:'ov-contre-caisse',label:'Compte contrepartie',type:'pcm',ph:'Ex: 6132, 4411, 3421…'}
+    ],
+    ecr:(v)=>{
+      const m=+v['ov-montant'];const sens=v['ov-sens-caisse']||'D';
+      const cNum=v['ov-contre-caisse-num']||'4481';const cNom=v['ov-contre-caisse-nom']||'Contrepartie';
+      return sens==='D'
+        ?[{num:'5161',nom:'Caisse',sens:'D',montant:m},{num:cNum,nom:cNom,sens:'C',montant:m}]
+        :[{num:cNum,nom:cNom,sens:'D',montant:m},{num:'5161',nom:'Caisse',sens:'C',montant:m}];
+    }},
+  charge:{label:'📋 Charge Diverse',
+    champs:[
+      {id:'ov-type-ch',label:'Type de charge',type:'select',opts:[{v:'6132',l:'Loyer (6132)'},{v:'6171',l:'Salaires (6171)'},{v:'6134',l:'Assurance (6134)'},{v:'6141',l:'Publicité (6141)'},{v:'6155',l:'Honoraires (6155)'},{v:'6142',l:'Transport (6142)'},{v:'6199',l:'Autre charge (6199)'}]},
+      {id:'ov-montant',label:'Montant (MAD)',type:'number',ph:'12000'},
+      {id:'ov-paiement',label:'Paiement via',type:'select',opts:[{v:'5141',l:'Banque (5141)'},{v:'5161',l:'Caisse (5161)'}]}
+    ],
+    ecr:(v)=>{const m=+v['ov-montant'],c=v['ov-type-ch']||'6199',pay=v['ov-paiement']||'5141';const payNom=pay==='5141'?'Banques':'Caisse';return [{num:c,nom:c+' – Charge',sens:'D',montant:m},{num:pay,nom:payNom,sens:'C',montant:m}];}}
+};
+let currentOp='capital';
+function selectOp(card){
+  document.querySelectorAll('.op-card').forEach(c=>c.classList.remove('sel'));
+  card.classList.add('sel');currentOp=card.dataset.op;
+  renderOpFields();updateOpPreview();
+}
+function renderOpFields(){
+  const op=OPS[currentOp];
+  document.getElementById('op-zone-title').textContent=op.label;
+  let html='';
+  op.champs.forEach(c=>{
+    html+=`<div class="fg" style="margin-bottom:10px;"><label>${c.label}</label>`;
+    if(c.type==='select'){
+      html+=`<select id="${c.id}" onchange="updateOpPreview()" style="border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);background:#fff;">`;
+      c.opts.forEach(o=>html+=`<option value="${o.v||o}">${o.l||o}</option>`);
+      html+=`</select>`;
+    } else if(c.type==='pcm'){
+      // PCM autocomplete field for contrepartie
+      html+=`<div style="position:relative;">
+        <input type="text" id="${c.id}-inp" placeholder="${c.ph||'N° ou nom du compte'}"
+          oninput="onOpPCMInput(this,'${c.id}')" onfocus="onOpPCMInput(this,'${c.id}')"
+          onblur="hideOpPCM('${c.id}')"
+          style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:9px 12px;font-size:12.5px;font-family:'Montserrat',sans-serif;outline:none;color:var(--text);transition:border-color .18s;"/>
+        <input type="hidden" id="${c.id}-num" value=""/>
+        <input type="hidden" id="${c.id}-nom" value=""/>
+        <div id="${c.id}-dd" class="pcm-dropdown"></div>
+      </div>`;
+    } else {
+      html+=`<input type="${c.type}" id="${c.id}" placeholder="${c.ph||''}" oninput="updateOpPreview()"/>`;
+    }
+    html+=`</div>`;
+  });
+  document.getElementById('op-fields').innerHTML=html;
+}
+function getOpVals(){
+  const op=OPS[currentOp];const v={};
+  op.champs.forEach(c=>{
+    if(c.type==='pcm'){
+      const numEl=document.getElementById(c.id+'-num');
+      const nomEl=document.getElementById(c.id+'-nom');
+      const inpEl=document.getElementById(c.id+'-inp');
+      v[c.id+'-num']=numEl?.value||inpEl?.value||'';
+      v[c.id+'-nom']=nomEl?.value||inpEl?.value||'';
+    } else {
+      const el=document.getElementById(c.id);if(el)v[c.id]=el.value||0;
+    }
+  });
+  return v;
+}
+function onOpPCMInput(inp,fieldId){
+  const q=inp.value.trim();
+  const dd=document.getElementById(fieldId+'-dd');
+  if(q.length<1){dd.style.display='none';return;}
+  const res=PCM.filter(c=>c.num.startsWith(q)||c.nom.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  if(!res.length){dd.style.display='none';return;}
+  dd.innerHTML=res.map(c=>`<div class="pcm-item" onmousedown="selectOpPCM('${fieldId}','${c.num}','${c.nom.replace(/'/g,"\\'")}')"><span class="pcm-num">${c.num}</span><span class="pcm-nom">${c.nom}</span></div>`).join('');
+  dd.style.display='block';
+}
+function selectOpPCM(fieldId,num,nom){
+  const inp=document.getElementById(fieldId+'-inp');
+  const numH=document.getElementById(fieldId+'-num');
+  const nomH=document.getElementById(fieldId+'-nom');
+  if(inp) inp.value=num+' – '+nom;
+  if(numH) numH.value=num;
+  if(nomH) nomH.value=nom;
+  document.getElementById(fieldId+'-dd').style.display='none';
+  updateOpPreview();
+}
+function hideOpPCM(fieldId){setTimeout(()=>{const dd=document.getElementById(fieldId+'-dd');if(dd)dd.style.display='none';},150);}
+function updateOpPreview(){
+  try{
+    const lignes=OPS[currentOp].ecr(getOpVals());
+    let h=`<div class="j-row jh"><div class="j-cell">Compte</div><div class="j-cell">Libellé</div><div class="j-cell amt">Débit</div><div class="j-cell amt">Crédit</div></div>`;
+    lignes.forEach(l=>{const isD=l.sens==='D';h+=`<div class="j-row"><div class="j-cell" style="font-weight:800;color:var(--navy);">${l.num}</div><div class="j-cell ${isD?'dbt':'crd'}">${isD?l.nom:'&nbsp;&nbsp;&nbsp;'+l.nom}</div><div class="j-cell amt">${isD?fmt(l.montant):''}</div><div class="j-cell amt">${!isD?fmt(l.montant):''}</div></div>`;});
+    document.getElementById('op-preview').innerHTML=h;
+  }catch(e){}
+}
+function enregistrerOperation(){
+  if(!currentUser){openAuth('login');return;}
+  const date=document.getElementById('op-date').value;
+  const ref=document.getElementById('op-ref').value.trim();
+  if(!date||!ref){alert('Date et référence requises.');return;}
+  try{
+    const lignes=OPS[currentOp].ecr(getOpVals());
+    if(!lignes.some(l=>l.montant>0)){alert('Montant requis.');return;}
+    const lib=document.getElementById('op-lib').value||OPS[currentOp].label;
+    DB.ecritures.push({id:Date.now(),date,ref,libelle:lib,type:'operation',soustype:currentOp,lignes});
+    saveDB();showToast('✅ Opération enregistrée !');resetOps();
+    setTimeout(()=>{showPage('journal');renderDashboard();},1200);
+  }catch(e){alert('Erreur dans les données.');}
+}
+function resetOps(){
+  document.getElementById('op-date').value=today();
+  document.getElementById('op-ref').value='OD-'+String(DB.ecritures.length+1).padStart(3,'0');
+  document.getElementById('op-lib').value='';
+  renderOpFields();updateOpPreview();
+}
+
+// ═══════════════════════════════════════
+//  JOURNAL MANUEL + PCM autocomplete
+// ═══════════════════════════════════════
+let jmRows=[];
+function addJMRow(sens){
+  const id='jmr-'+Date.now();
+  jmRows.push({id,sens,num:'',nom:'',montant:0});
+  renderJMRows();
+}
+function renderJMRows(){
+  let h='';
+  jmRows.forEach((r,i)=>{
+    const isD=r.sens==='D';
+    const sensLabel=isD
+      ?'<span style="background:#fff0f0;color:var(--red);font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;">DÉBIT</span>'
+      :'<span style="background:#e8f0ff;color:var(--blue);font-size:10px;font-weight:800;padding:2px 7px;border-radius:10px;">CRÉDIT</span>';
+    h+=`<div style="display:grid;grid-template-columns:30px 110px 1fr 120px 120px 30px;border-bottom:1px solid #f0f3f8;align-items:center;">
+      <div style="padding:6px 4px;text-align:center;">${sensLabel.replace('<span ','<span style="writing-mode:normal" ')}</div>
+      <div style="padding:4px 6px;position:relative;">
+        <input style="width:100%;border:1.5px solid ${isD?'#fecaca':'#bfdbfe'};border-radius:6px;padding:6px 8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:800;color:${isD?'var(--red)':'var(--blue)'};outline:none;background:${isD?'#fff8f8':'#f0f6ff'};"
+          placeholder="N° compte" value="${r.num}"
+          oninput="onJMNumInput(this,${i})" onfocus="onJMNumInput(this,${i})" onblur="hideJMPCM()"/>
+        <div class="pcm-dropdown" id="pcm-dd-${i}"></div>
+      </div>
+      <div style="padding:4px 6px;">
+        <input style="width:100%;border:1.5px solid var(--border);border-radius:6px;padding:6px 8px;font-family:'Montserrat',sans-serif;font-size:12px;outline:none;font-style:${isD?'normal':'italic'};"
+          placeholder="${isD?'Libellé compte débiteur':'    Libellé compte créditeur'}" value="${r.nom}"
+          oninput="jmRows[${i}].nom=this.value;updateJMBalance();"/>
+      </div>
+      <div style="padding:4px 6px;">
+        <input type="number" style="width:100%;border:1.5px solid ${isD?'#fecaca':'var(--border)'};border-radius:6px;padding:6px 8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--red);text-align:right;outline:none;background:${isD?'#fff8f8':'#f9f9f9'};"
+          placeholder="${isD?'Montant':'—'}" ${!isD?'readonly':''} value="${isD&&r.montant?r.montant:''}"
+          oninput="jmRows[${i}].montant=+this.value;updateJMBalance();"/>
+      </div>
+      <div style="padding:4px 6px;">
+        <input type="number" style="width:100%;border:1.5px solid ${!isD?'#bfdbfe':'var(--border)'};border-radius:6px;padding:6px 8px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;color:var(--blue);text-align:right;outline:none;background:${!isD?'#f0f6ff':'#f9f9f9'};"
+          placeholder="${!isD?'Montant':'—'}" ${isD?'readonly':''} value="${!isD&&r.montant?r.montant:''}"
+          oninput="jmRows[${i}].montant=+this.value;updateJMBalance();"/>
+      </div>
+      <div style="padding:4px 2px;text-align:center;">
+        <button class="del-btn" onclick="jmRows.splice(${i},1);renderJMRows();">✕</button>
+      </div>
+    </div>`;
+  });
+  if(jmRows.length===0) h='<div style="text-align:center;padding:18px;color:var(--muted);font-size:12.5px;">Ajoutez des lignes Débit et Crédit ci-dessous.</div>';
+  document.getElementById('jm-body').innerHTML=h;
+  updateJMBalance();
+}
+function onJMNumInput(inp,i){
+  const q=inp.value.trim();jmRows[i].num=q;
+  const dd=document.getElementById('pcm-dd-'+i);
+  if(q.length<2){dd.style.display='none';return;}
+  const res=PCM.filter(c=>c.num.startsWith(q)||c.nom.toLowerCase().includes(q.toLowerCase())).slice(0,8);
+  if(!res.length){dd.style.display='none';return;}
+  dd.innerHTML=res.map(c=>`<div class="pcm-item" onmousedown="selectJMPCM(${i},'${c.num}','${c.nom.replace(/'/g,'\\\'')}')" ><span class="pcm-num">${c.num}</span><span class="pcm-nom">${c.nom}</span></div>`).join('');
+  dd.style.display='block';
+}
+function selectJMPCM(i,num,nom){
+  jmRows[i].num=num;jmRows[i].nom=nom;
+  renderJMRows();
+}
+function hideJMPCM(){setTimeout(()=>document.querySelectorAll('.pcm-dropdown').forEach(d=>d.style.display='none'),150);}
+function updateJMBalance(){
+  const totD=jmRows.filter(r=>r.sens==='D').reduce((s,r)=>s+r.montant,0);
+  const totC=jmRows.filter(r=>r.sens==='C').reduce((s,r)=>s+r.montant,0);
+  const diff=totD-totC;
+  const el=document.getElementById('jm-balance');
+  if(jmRows.length===0){el.textContent='';return;}
+  el.textContent=`Débit total : ${fmt(totD)} | Crédit total : ${fmt(totC)} | Écart : ${fmt(Math.abs(diff))}`;
+  el.style.color=Math.abs(diff)<0.01?'var(--green)':'var(--red)';
+}
+function enregistrerJManuel(){
+  if(!currentUser){openAuth('login');return;}
+  const date=document.getElementById('jm-date').value;
+  const ref=document.getElementById('jm-ref').value.trim();
+  const lib=document.getElementById('jm-lib').value.trim();
+  if(!date||!ref||jmRows.length<2){alert('Date, référence et au moins 2 lignes requises.');return;}
+  const totD=jmRows.filter(r=>r.sens==='D').reduce((s,r)=>s+r.montant,0);
+  const totC=jmRows.filter(r=>r.sens==='C').reduce((s,r)=>s+r.montant,0);
+  if(Math.abs(totD-totC)>0.01){alert('⚠️ Débit ≠ Crédit. L\'écriture doit être équilibrée.');return;}
+  const lignes=jmRows.map(r=>({num:r.num,nom:r.nom||r.num,sens:r.sens,montant:r.montant}));
+  DB.ecritures.push({id:Date.now(),date,ref,libelle:lib||'Écriture manuelle',type:'manuel',soustype:'manuel',lignes});
+  saveDB();showToast('✅ Écriture manuelle enregistrée !');resetJManuel();
+  setTimeout(()=>{showPage('journal');renderDashboard();},1200);
+}
+function resetJManuel(){
+  jmRows=[];renderJMRows();
+  document.getElementById('jm-date').value=today();
+  document.getElementById('jm-ref').value='OD-'+String(DB.ecritures.length+1).padStart(3,'0');
+  document.getElementById('jm-lib').value='';
+}
+
+// ═══════════════════════════════════════
+//  JOURNAL VIEW
+// ═══════════════════════════════════════
+function renderJournal(){
+  const cont=document.getElementById('journal-content');
+  const stats=document.getElementById('journal-stats');
+  if(DB.ecritures.length===0){
+    stats.style.display='none';
+    cont.innerHTML=`<div class="j-empty"><div class="jei">📋</div><p>Aucune écriture.<br/><a onclick="gotoSaisie('tab-facture')">Saisissez votre première opération</a></p></div>`;return;
+  }
+  const totalV=sumLigne('7111','C');const totalA=sumLigne('6111','D');
+  stats.style.display='grid';
+  stats.innerHTML=`<div class="stat-item"><div class="stat-val">${DB.ecritures.length}</div><div class="stat-lbl">Écritures</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:var(--green)">${fmt(totalV)}</div><div class="stat-lbl">Ventes HT</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:var(--red)">${fmt(totalA)}</div><div class="stat-lbl">Achats HT</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:var(--blue)">${fmt(totalV-totalA)}</div><div class="stat-lbl">Marge brute</div></div>`;
+  const sorted=[...DB.ecritures].sort((a,b)=>a.date.localeCompare(b.date));
+  let html='';
+  sorted.forEach(e=>{
+    const badge=e.type==='facture'?(e.soustype.includes('vente')?'<span class="badge green">Vente</span>':e.soustype.includes('immo')?'<span class="badge orange">Achat Immo</span>':'<span class="badge red">Achat Charge</span>'):e.type==='manuel'?'<span class="badge purple">Manuel</span>':'<span class="badge blue">'+e.soustype+'</span>';
+    html+=`<div class="j-entry"><div class="j-date-bar"><span>📅 ${fmtDate(e.date)}</span><span>${badge} — Réf: <strong>${e.ref}</strong> | ${e.libelle}</span></div>
+      <div class="j-row jh"><div class="j-cell">Compte</div><div class="j-cell">Libellé</div><div class="j-cell amt">Débit</div><div class="j-cell amt">Crédit</div></div>`;
+    e.lignes.forEach(l=>{const isD=l.sens==='D';
+      html+=`<div class="j-row"><div class="j-cell" style="font-weight:800;color:var(--navy);">${l.num}</div><div class="j-cell ${isD?'dbt':'crd'}">${isD?l.nom:'&nbsp;&nbsp;&nbsp;'+l.nom}</div><div class="j-cell amt">${isD?fmt(l.montant):''}</div><div class="j-cell amt">${!isD?fmt(l.montant):''}</div></div>`;
+    });
+    html+=`</div>`;
+  });
+  cont.innerHTML=html;
+}
+
+// ═══════════════════════════════════════
+//  GRAND LIVRE
+// ═══════════════════════════════════════
+function renderGL(){
+  const cont=document.getElementById('gl-content');
+  if(DB.ecritures.length===0){cont.innerHTML=`<div class="j-empty"><div class="jei">📒</div><p>Aucun compte.<br/><a onclick="gotoSaisie('tab-facture')">Saisissez une opération</a></p></div>`;return;}
+  const cpts=buildSoldes();
+  const groupes=[
+    {label:'Financement permanent',pre:['1']},
+    {label:'Actif immobilisé',pre:['2']},
+    {label:'Actif circulant',pre:['3']},
+    {label:'Passif circulant — Fournisseurs & État',pre:['4']},
+    {label:'Trésorerie — Banque & Caisse',pre:['5']},
+    {label:'Charges',pre:['6']},
+    {label:'Produits',pre:['7']},
+  ];
+  let html='';
+  groupes.forEach(g=>{
+    const list=Object.values(cpts).filter(c=>g.pre.some(p=>String(c.num).startsWith(p)));
+    if(!list.length)return;
+    html+=`<div class="gl-section"><div class="gl-sec-title">${g.label}</div><div class="gl-grid">`;
+    list.sort((a,b)=>String(a.num).localeCompare(String(b.num))).forEach(c=>{
+      const sol=c.D-c.C;const sd=sol>=0;
+      html+=`<div class="gl-cpt"><div class="gl-cpt-hdr"><span class="gl-cpt-num">${c.num}</span><span class="gl-cpt-name">${c.nom}</span></div>
+        <div class="gl-dc"><div class="gl-dc-h d">D</div><div class="gl-dc-h c">C</div></div>
+        <div class="gl-vals"><div class="gl-v d">${fmt(c.D)}</div><div class="gl-v c">${fmt(c.C)}</div></div>
+        <div class="gl-solde ${sd?'sd':'sc'}">Solde ${sd?'Débiteur':'Créditeur'} : ${fmt(Math.abs(sol))}</div></div>`;
+    });
+    html+=`</div></div>`;
+  });
+  cont.innerHTML=html;
+}
+
+// ═══════════════════════════════════════
+//  BILAN — NOUVEAU MODULE PROFESSIONNEL
+// ═══════════════════════════════════════
+function renderBilan(){
+  const wrap=document.getElementById('bilan-wrap');
+  const S=buildSoldes();
+  const sd=n=>Math.max(0,(S[n]?.D||0)-(S[n]?.C||0));
+  const sc=n=>Math.max(0,(S[n]?.C||0)-(S[n]?.D||0));
+  const scMulti=(...nums)=>nums.reduce((s,n)=>s+sc(n),0);
+  const sdMulti=(...nums)=>nums.reduce((s,n)=>s+sd(n),0);
+
+  // ── ACTIF ──
+  const terrains=sd('2311');
+  const constructions=sd('2321');
+  const instTech=sd('2331');
+  const matTransp=sd('2340');
+  const matBureau=sd('2350');
+  const mobilier=sd('2355');
+  const matInfo=sd('2360');
+  const brevets=sd('2210');
+  const totAI=terrains+constructions+instTech+matTransp+matBureau+mobilier+matInfo+brevets;
+
+  const marchandises=sd('3111');
+  const matieres=sd('3121');
+  const clients=sdMulti('3421','3411','3431');
+  const tvaRecAch=sd('34552');
+  const tvaRecImmo=sdMulti('34511','34512');
+  const autresCreances=sd('3471');
+  const chargesAvance=sd('3481');
+  const totAC=marchandises+matieres+clients+tvaRecAch+tvaRecImmo+autresCreances+chargesAvance;
+
+  const banque=sd('5141');
+  const ccp=sd('5142');
+  const tg=sd('5143');
+  const caisse=sd('5161');
+  const totTA=banque+ccp+tg+caisse;
+
+  const totActif=totAI+totAC+totTA;
+
+  // ── PASSIF ──
+  const capital=sc('1111');
+  const reserves=scMulti('1121','1131');
+  const report=sc('1151');
+  const ventes=scMulti('7111','7121','7131','7141');
+  const achats=sdMulti('6111','6121','6132','6133','6134','6141','6142','6155','6171','6174','6193','6194','6196','6199');
+  const resultat=ventes-achats;
+  const totCapPropres=capital+reserves+report+Math.max(0,resultat);
+
+  const emprunts=scMulti('1411','1481');
+  const totFP=totCapPropres+emprunts;
+
+  const fournisseurs=sc('4411');
+  const personnel=sc('4421');
+  const organismes=sc('4431');
+  const etatIS=sc('4443');
+  const tvaDue=scMulti('4455','4456');
+  const autresDettes=sc('4481');
+  const prodsAvance=sc('4491');
+  const totPC=fournisseurs+personnel+organismes+etatIS+tvaDue+autresDettes+prodsAvance;
+
+  const bancairesCred=sc('5193');
+  const totTP=bancairesCred;
+
+  const totPassif=totFP+totPC+totTP;
+  const equilibre=Math.abs(totActif-totPassif)<0.5;
+
+  if(DB.ecritures.length===0){
+    wrap.innerHTML=`<div class="bilan-wrapper"><div style="text-align:center;padding:48px 20px;color:var(--muted);"><div style="font-size:52px;margin-bottom:14px;">📊</div><p>Saisissez des opérations pour alimenter le bilan.</p></div></div>`;return;
+  }
+
+  const ligneB=(nom,val)=>`<div class="bilan-ligne ${val>0?'active':''}"><span class="bl-nom">${nom}</span><span class="bl-val ${val>0?'':'zero'}">${val>0?fmt(val):'—'}</span></div>`;
+  const sousTotal=(label,val)=>`<div class="bilan-sous-total"><span>${label}</span><span class="bst-val">${fmt(val)}</span></div>`;
+
+  wrap.innerHTML=`
+  <div class="bilan-wrapper">
+    <div class="bilan-top-bar">
+      <div><h2>📊 Bilan Comptable</h2><p>Situation patrimoniale de l'entreprise ${currentUser?.societe?'— '+currentUser.societe:''}</p></div>
+      <div class="bilan-date-badge">📅 Exercice ${new Date().getFullYear()}</div>
+    </div>
+    <div class="bilan-summary">
+      <div class="bilan-kpi"><div class="bk-val" style="color:var(--red)">${fmt(totActif)}</div><div class="bk-lbl">Total Actif</div></div>
+      <div class="bilan-kpi"><div class="bk-val" style="color:var(--blue)">${fmt(totPassif)}</div><div class="bk-lbl">Total Passif</div></div>
+      <div class="bilan-kpi"><div class="bk-val" style="color:${resultat>=0?'var(--green)':'var(--red)'}">${(resultat>=0?'+':'')+fmt(resultat)}</div><div class="bk-lbl">Résultat</div></div>
+    </div>
+    <div class="bilan-cols">
+      <div class="bilan-col">
+        <div class="bilan-col-hdr actif">⬅ ACTIF — Emplois</div>
+        <div class="bilan-section">
+          <div class="bilan-section-hdr ai">🏗️ Actif Immobilisé</div>
+          <div class="bilan-group"><div class="bilan-group-title">Immobilisations incorporelles</div>
+            ${ligneB('Brevets & licences (2210)',brevets)}
+          </div>
+          <div class="bilan-group"><div class="bilan-group-title">Immobilisations corporelles</div>
+            ${ligneB('Terrains (2311)',terrains)}
+            ${ligneB('Constructions (2321)',constructions)}
+            ${ligneB('Installations techniques (2331)',instTech)}
+            ${ligneB('Matériel de transport (2340)',matTransp)}
+            ${ligneB('Matériel de bureau (2350)',matBureau)}
+            ${ligneB('Mobilier (2355)',mobilier)}
+            ${ligneB('Matériel informatique (2360)',matInfo)}
+          </div>
+          ${sousTotal('Sous-total Actif Immobilisé',totAI)}
+        </div>
+        <div class="bilan-section">
+          <div class="bilan-section-hdr ac">🔄 Actif Circulant</div>
+          <div class="bilan-group"><div class="bilan-group-title">Stocks</div>
+            ${ligneB('Marchandises (3111)',marchandises)}
+            ${ligneB('Matières premières (3121)',matieres)}
+          </div>
+          <div class="bilan-group"><div class="bilan-group-title">Créances</div>
+            ${ligneB('Clients et C.R (3421)',clients)}
+            ${ligneB('TVA récupérable achats (34552)',tvaRecAch)}
+            ${ligneB('TVA récupérable immo (34511)',tvaRecImmo)}
+            ${ligneB('Autres créances (3471)',autresCreances)}
+            ${ligneB('Charges constatées d\'avance',chargesAvance)}
+          </div>
+          ${sousTotal('Sous-total Actif Circulant',totAC)}
+        </div>
+        <div class="bilan-section">
+          <div class="bilan-section-hdr ta">🏦 Trésorerie — Actif</div>
+          ${ligneB('Banques (5141)',banque)}
+          ${ligneB('CCP (5142)',ccp)}
+          ${ligneB('Trésorerie Générale (5143)',tg)}
+          ${ligneB('Caisse (5161)',caisse)}
+          ${sousTotal('Sous-total Trésorerie Actif',totTA)}
+        </div>
+      </div>
+      <div class="bilan-col">
+        <div class="bilan-col-hdr passif">PASSIF — Ressources ➡</div>
+        <div class="bilan-section">
+          <div class="bilan-section-hdr fp">💎 Financement Permanent</div>
+          <div class="bilan-group"><div class="bilan-group-title">Capitaux propres</div>
+            ${ligneB('Capital social (1111)',capital)}
+            ${ligneB('Réserves (1121/1131)',reserves)}
+            ${ligneB('Report à nouveau (1151)',report)}
+            ${ligneB(`Résultat ${resultat>=0?'(bénéfice)':'(perte)'} `,Math.abs(resultat))}
+          </div>
+          <div class="bilan-group"><div class="bilan-group-title">Dettes de financement</div>
+            ${ligneB('Emprunts & dettes LT (1481)',emprunts)}
+          </div>
+          ${sousTotal('Sous-total Financement Permanent',totFP)}
+        </div>
+        <div class="bilan-section">
+          <div class="bilan-section-hdr pc">📄 Passif Circulant</div>
+          <div class="bilan-group"><div class="bilan-group-title">Dettes d'exploitation</div>
+            ${ligneB('Fournisseurs (4411)',fournisseurs)}
+            ${ligneB('Personnel — salaires dus (4421)',personnel)}
+            ${ligneB('Organismes sociaux (4431)',organismes)}
+          </div>
+          <div class="bilan-group"><div class="bilan-group-title">Dettes fiscales</div>
+            ${ligneB('État IS (4443)',etatIS)}
+            ${ligneB('TVA due (4455/4456)',tvaDue)}
+          </div>
+          <div class="bilan-group"><div class="bilan-group-title">Autres</div>
+            ${ligneB('Créditeurs divers (4481)',autresDettes)}
+            ${ligneB('Produits constatés d\'avance',prodsAvance)}
+          </div>
+          ${sousTotal('Sous-total Passif Circulant',totPC)}
+        </div>
+        <div class="bilan-section">
+          <div class="bilan-section-hdr tp">🏛️ Trésorerie — Passif</div>
+          ${ligneB('Banques — soldes créditeurs (5193)',bancairesCred)}
+          ${sousTotal('Sous-total Trésorerie Passif',totTP)}
+        </div>
+      </div>
+    </div>
+    <div class="bilan-total-bar">
+      <div class="bilan-total-cell"><span class="btc-label">TOTAL ACTIF</span><span class="btc-val">${fmt(totActif)}</span></div>
+      <div class="bilan-total-cell"><span class="btc-label">TOTAL PASSIF</span><span class="btc-val">${fmt(totPassif)}</span></div>
+    </div>
+    <div class="bilan-equilibre ${equilibre?'ok':'nok'}">
+      ${equilibre?'✅ Bilan équilibré — Actif = Passif':'⚠️ Bilan non équilibré — Écart : '+fmt(Math.abs(totActif-totPassif))+' MAD'}
+    </div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  CPC
+// ═══════════════════════════════════════
+function renderCPC(){
+  const wrap=document.getElementById('cpc-wrap');
+  if(DB.ecritures.length===0){wrap.innerHTML=`<p style="text-align:center;color:var(--muted);padding:30px 0;">Saisissez des opérations pour calculer le CPC.</p>`;return;}
+  const S=buildSoldes();
+  const gD=n=>Math.max(0,(S[n]?.D||0)-(S[n]?.C||0));
+  const gC=n=>Math.max(0,(S[n]?.C||0)-(S[n]?.D||0));
+  const ventes=gC('7111');const autresProd=gC('7141')+gC('7151')+gC('7181');
+  const achats=gD('6111');const loyer=gD('6132');const salaires=gD('6171');
+  const charges_soc=gD('6174');const assurance=gD('6134');const pub=gD('6141');
+  const transport=gD('6142');const honoraires=gD('6155');const dotAmort=gD('6193')+gD('6194');
+  const autresCharges=gD('6199');
+  const totalC=achats+loyer+salaires+charges_soc+assurance+pub+transport+honoraires+dotAmort+autresCharges;
+  const totalP=ventes+autresProd;
+  const res=totalP-totalC;const isP=res>=0;
+  const cRow=(l,v)=>`<tr class="sub-row"><td>${l}</td><td class="amt">${v>0?fmt(v):'—'}</td><td></td></tr>`;
+  const pRow=(l,v)=>`<tr class="sub-row"><td>${l}</td><td></td><td class="amt">${v>0?fmt(v):'—'}</td></tr>`;
+  wrap.innerHTML=`<table class="cpc-tbl">
+    <thead><tr><th style="width:46%">DÉSIGNATION</th><th style="width:27%">CHARGES</th><th style="width:27%">PRODUITS</th></tr></thead>
+    <tbody>
+      <tr class="cat-row"><td colspan="3">EXPLOITATION</td></tr>
+      ${cRow('Achats marchandises (6111)',achats)}${cRow('Loyers (6132)',loyer)}${cRow('Salaires (6171)',salaires)}
+      ${cRow('Charges sociales (6174)',charges_soc)}${cRow('Assurances (6134)',assurance)}${cRow('Publicité (6141)',pub)}
+      ${cRow('Transport (6142)',transport)}${cRow('Honoraires (6155)',honoraires)}${cRow('Amortissements (6193)',dotAmort)}${cRow('Autres charges (6199)',autresCharges)}
+      ${pRow('Ventes marchandises (7111)',ventes)}${pRow('Autres produits',autresProd)}
+      <tr class="total-row"><td>TOTAL</td><td class="amt">${fmt(totalC)}</td><td class="amt">${fmt(totalP)}</td></tr>
+      <tr class="res-row ${isP?'':'loss'}"><td>${isP?'✅ BÉNÉFICE NET':'⚠️ PERTE NETTE'}</td><td class="amt">${isP?'':fmt(Math.abs(res))}</td><td class="amt">${isP?fmt(res):''}</td></tr>
+    </tbody></table>
+  <div style="margin-top:14px;padding:12px 16px;background:var(--bg);border-radius:9px;font-size:12.5px;color:var(--muted);">
+    Produits <strong style="color:var(--green)">${fmt(totalP)}</strong> — Charges <strong style="color:var(--red)">${fmt(totalC)}</strong> = <strong style="color:${isP?'var(--green)':'var(--red)'}">${isP?'+':'-'}${fmt(Math.abs(res))} MAD</strong>
+  </div>`;
+}
+
+// ═══════════════════════════════════════
+//  PLAN COMPTABLE
+// ═══════════════════════════════════════
+function renderPCM(){
+  const q=(document.getElementById('pcm-search')?.value||'').toLowerCase().trim();
+  const filtered=q?PCM.filter(c=>c.num.includes(q)||c.nom.toLowerCase().includes(q)||c.classe.toLowerCase().includes(q)):PCM;
+  const classes=[...new Set(filtered.map(c=>c.classe))];
+  let html='';
+  classes.forEach(cl=>{
+    const items=filtered.filter(c=>c.classe===cl);
+    html+=`<div class="pcm-classe-title">${cl}</div>
+    <table class="pcm-table"><thead><tr><th style="width:80px">N° Compte</th><th>Intitulé</th><th style="width:100px">Action</th></tr></thead><tbody>`;
+    items.forEach(c=>{
+      html+=`<tr><td class="pcm-num">${c.num}</td><td>${c.nom}</td><td><button class="pcm-use-btn" onclick="usePCMCompte('${c.num}','${c.nom.replace(/'/g,"\\'")}')">Utiliser</button></td></tr>`;
+    });
+    html+=`</tbody></table>`;
+  });
+  if(!html) html='<p style="color:var(--muted);font-size:13px;">Aucun compte trouvé.</p>';
+  document.getElementById('pcm-content').innerHTML=html;
+}
+function usePCMCompte(num,nom){
+  gotoSaisie('tab-jmanuel');
+  jmRows.push({id:'jmr-'+Date.now(),sens:'D',num,nom,montant:0});
+  renderJMRows();
+  showToast('✅ Compte '+num+' ajouté à l\'écriture !');
+}
+
+// ═══════════════════════════════════════
+//  FISCALITE CALC
+// ═══════════════════════════════════════
+function calcIS(){
+  const rc=parseFloat(document.getElementById('is-rc').value)||0;
+  const reint=parseFloat(document.getElementById('is-reint').value)||0;
+  const ded=parseFloat(document.getElementById('is-ded').value)||0;
+  const ca=parseFloat(document.getElementById('is-ca').value)||0;
+  const rf=rc+reint-ded;if(rf<=0&&ca<=0){document.getElementById('is-result').style.display='none';return;}
+  let taux=rf<=300000?.10:rf<=1000000?.20:rf<=100000000?.31:.33;
+  const is=rf*taux;const cm=Math.max(3000,ca*.005);const final=Math.max(is,cm);
+  const box=document.getElementById('is-result');box.style.display='block';
+  box.innerHTML=`<div class="cr-row"><span>Résultat comptable</span><span>${fmt(rc)} MAD</span></div>
+    <div class="cr-row"><span>+ Réintégrations</span><span>${fmt(reint)} MAD</span></div>
+    <div class="cr-row"><span>− Déductions</span><span>${fmt(ded)} MAD</span></div>
+    <div class="cr-row" style="font-weight:800;padding-top:8px;border-top:2px solid var(--border);"><span>= Résultat fiscal</span><span>${fmt(rf)} MAD</span></div>
+    <div class="cr-row"><span>Taux IS</span><span>${(taux*100)}%</span></div>
+    <div class="cr-row"><span>IS théorique</span><span>${fmt(is)} MAD</span></div>
+    <div class="cr-row"><span>Cotisation Minimale</span><span>${fmt(cm)} MAD</span></div>
+    <div class="cr-row"><span style="color:var(--green);">IS à payer</span><span style="color:var(--green);">${fmt(final)} MAD</span></div>`;
+}
+function calcTVAFisc(){
+  const ht=parseFloat(document.getElementById('tva-ht').value)||0;
+  const t=parseFloat(document.getElementById('tva-taux').value)||0;
+  if(ht<=0){document.getElementById('tva-result').style.display='none';return;}
+  const tva=ht*t/100;const box=document.getElementById('tva-result');box.style.display='block';
+  box.innerHTML=`<div class="cr-row"><span>HT</span><span>${fmt(ht)} MAD</span></div><div class="cr-row"><span>TVA (${t}%)</span><span>${fmt(tva)} MAD</span></div><div class="cr-row"><span style="color:var(--blue);">TTC</span><span style="color:var(--blue);">${fmt(ht+tva)} MAD</span></div>`;
+}
+function calcIR(){
+  const brut=parseFloat(document.getElementById('ir-brut').value)||0;
+  const cot=parseFloat(document.getElementById('ir-cot').value)||0;
+  if(brut<=0){document.getElementById('ir-result').style.display='none';return;}
+  const an=brut*12;const fp=Math.min(an*.20,30000);const rni=an-fp-cot*12;
+  let t=0,d=0;
+  if(rni>180000){t=.38;d=24400;}else if(rni>80000){t=.34;d=17200;}else if(rni>60000){t=.30;d=14000;}else if(rni>50000){t=.20;d=8000;}else if(rni>30000){t=.10;d=3000;}
+  const irAn=Math.max(0,rni*t-d);const irM=irAn/12;const net=brut-cot-irM;
+  const box=document.getElementById('ir-result');box.style.display='block';
+  box.innerHTML=`<div class="cr-row"><span>Salaire brut mensuel</span><span>${fmt(brut)} MAD</span></div>
+    <div class="cr-row"><span>Cotisations</span><span>-${fmt(cot)} MAD</span></div>
+    <div class="cr-row"><span>Frais pro (20%)</span><span>-${fmt(fp/12)} MAD</span></div>
+    <div class="cr-row" style="font-weight:800;"><span>Revenu net imposable annuel</span><span>${fmt(rni)} MAD</span></div>
+    <div class="cr-row"><span>IR mensuel</span><span>${fmt(irM)} MAD</span></div>
+    <div class="cr-row"><span style="color:var(--green);">Salaire net mensuel</span><span style="color:var(--green);">${fmt(net)} MAD</span></div>`;
+}
+
+// ═══════════════════════════════════════
+//  UTILS
+// ═══════════════════════════════════════
+function buildSoldes(){
+  const S={};
+  DB.ecritures.forEach(e=>e.lignes.forEach(l=>{
+    if(!S[l.num]) S[l.num]={num:l.num,nom:l.nom,D:0,C:0};
+    if(l.sens==='D') S[l.num].D+=l.montant; else S[l.num].C+=l.montant;
+  }));
+  return S;
+}
+function sumLigne(num,sens){
+  const S=buildSoldes();
+  if(!S[num]) return 0;
+  return sens==='D'?S[num].D:S[num].C;
+}
+function clearAll(){
+  if(confirm('Effacer toutes les écritures de cet utilisateur ?')){
+    DB={ecritures:[]};saveDB();renderJournal();showToast('🗑 Effacé.');
+  }
+}
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+}
+function fmt(n){return (n||0).toLocaleString('fr-MA',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDate(d){if(!d)return'—';const[y,m,j]=d.split('-');return`${j}/${m}/${y}`;}
+function today(){return new Date().toISOString().split('T')[0];}
+function autoFacNum(){
+  const n=DB.ecritures.filter(e=>e.type==='facture').length+1;
+  const el=document.getElementById('fac-num');if(el) el.value='FAC-'+String(n).padStart(3,'0');
+}
+
+// ═══════════════════════════════════════
+//  DASHBOARD
+// ═══════════════════════════════════════
+function renderDashboard(){
+  const hasDash=currentUser&&DB.ecritures.length>0;
+  document.getElementById('home-dashboard').style.display=hasDash?'block':'none';
+  document.getElementById('home-modules').style.display=hasDash?'none':'block';
+  if(!hasDash) return;
+
+  const S=buildSoldes();
+  const sd=n=>Math.max(0,(S[n]?.D||0)-(S[n]?.C||0));
+  const sc=n=>Math.max(0,(S[n]?.C||0)-(S[n]?.D||0));
+  const scM=(...ns)=>ns.reduce((s,n)=>s+sc(n),0);
+  const sdM=(...ns)=>ns.reduce((s,n)=>s+sd(n),0);
+
+  const ventes=scM('7111','7121','7131','7141');
+  const achats=sdM('6111','6121','6132','6133','6134','6141','6142','6155','6171','6174','6193','6194','6199');
+  const resultat=ventes-achats;
+  const clients=sdM('3421','3411');
+  const fournisseurs=sc('4411');
+  const banque=sd('5141');
+  const caisse=sd('5161');
+  const capital=sc('1111');
+  const totActif=sdM('2311','2321','2331','2340','2350','2355','2360','2210')+sdM('3111','3121','3421','34552','34511','3471')+sd('5141')+sd('5142')+sd('5143')+sd('5161');
+  const tresoTotale=banque+caisse;
+
+  // KPIs
+  const isP=resultat>=0;
+  document.getElementById('dash-kpis').innerHTML=`
+    <div class="kpi-card" onclick="showPage('cpc')" style="border-top:3px solid ${isP?'var(--green)':'var(--red)'};">
+      <div class="kc-icon">${isP?'📈':'📉'}</div>
+      <div class="kc-val" style="color:${isP?'var(--green)':'var(--red)'}">${isP?'+':'-'}${fmt(Math.abs(resultat))}</div>
+      <div class="kc-lbl">Résultat Net</div>
+      <div class="kc-sub">${isP?'Bénéfice':'Perte'} de l'exercice</div>
+    </div>
+    <div class="kpi-card" onclick="showPage('cpc')" style="border-top:3px solid var(--green);">
+      <div class="kc-icon">💹</div>
+      <div class="kc-val" style="color:var(--green)">${fmt(ventes)}</div>
+      <div class="kc-lbl">Chiffre d'Affaires</div>
+      <div class="kc-sub">Total ventes HT</div>
+    </div>
+    <div class="kpi-card" onclick="showPage('cpc')" style="border-top:3px solid var(--red);">
+      <div class="kc-icon">🛒</div>
+      <div class="kc-val" style="color:var(--red)">${fmt(achats)}</div>
+      <div class="kc-lbl">Total Charges</div>
+      <div class="kc-sub">Achats & charges</div>
+    </div>
+    <div class="kpi-card" onclick="showPage('bilan')" style="border-top:3px solid var(--teal);">
+      <div class="kc-icon">🏦</div>
+      <div class="kc-val" style="color:var(--teal)">${fmt(tresoTotale)}</div>
+      <div class="kc-lbl">Trésorerie</div>
+      <div class="kc-sub">Banque + Caisse</div>
+    </div>
+    <div class="kpi-card" onclick="showPage('bilan')" style="border-top:3px solid var(--blue);">
+      <div class="kc-icon">👥</div>
+      <div class="kc-val" style="color:var(--blue)">${fmt(clients)}</div>
+      <div class="kc-lbl">Créances Clients</div>
+      <div class="kc-sub">À encaisser</div>
+    </div>
+    <div class="kpi-card" onclick="showPage('bilan')" style="border-top:3px solid var(--orange);">
+      <div class="kc-icon">🏭</div>
+      <div class="kc-val" style="color:var(--orange)">${fmt(fournisseurs)}</div>
+      <div class="kc-lbl">Dettes Fournisseurs</div>
+      <div class="kc-sub">À décaisser</div>
+    </div>`;
+
+  // Dernières écritures
+  const last5=[...DB.ecritures].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  let ecHtml='';
+  if(last5.length===0) ecHtml=`<div class="dash-empty"><div class="dei">📋</div><p>Aucune écriture.</p></div>`;
+  else last5.forEach(e=>{
+    const badge=e.type==='facture'&&e.soustype.includes('vente')?'<span class="badge green" style="font-size:9px;">Vente</span>':e.type==='facture'?'<span class="badge red" style="font-size:9px;">Achat</span>':'<span class="badge blue" style="font-size:9px;">Op.</span>';
+    const tot=e.lignes.filter(l=>l.sens==='D').reduce((s,l)=>s+l.montant,0);
+    ecHtml+=`<div class="dash-row"><div class="dr-nom">${badge} ${e.ref} — ${e.libelle.substring(0,28)}</div><div class="dr-val">${fmt(tot)}</div></div>`;
+  });
+  document.getElementById('dash-ecritures').innerHTML=ecHtml;
+
+  // Répartition charges/produits barres
+  const maxV=Math.max(ventes,achats,1);
+  let repHtml='';
+  if(ventes===0&&achats===0){
+    repHtml=`<div class="dash-empty"><div class="dei">📊</div><p>Pas encore de données.</p></div>`;
+  } else {
+    const items=[
+      {label:'Ventes (CA)',val:ventes,color:'var(--green)'},
+      {label:'Achats & charges',val:achats,color:'var(--red)'},
+      {label:'Banque',val:banque,color:'var(--teal)'},
+      {label:'Capital',val:capital,color:'var(--purple,#7c3aed)'},
+    ].filter(i=>i.val>0);
+    items.forEach(it=>{
+      const pct=Math.round(it.val/maxV*100);
+      repHtml+=`<div class="dash-bar-item">
+        <div class="dash-bar-label"><span>${it.label}</span><span style="color:${it.color};font-weight:800;">${fmt(it.val)}</span></div>
+        <div class="dash-bar-track"><div class="dash-bar-fill" style="width:${pct}%;background:${it.color};"></div></div>
+      </div>`;
+    });
+    repHtml=`<div class="dash-bar-wrap">${repHtml}</div>`;
+  }
+  document.getElementById('dash-repartition').innerHTML=repHtml;
+
+  // Bilan résumé
+  const totFP=capital+scM('1121','1131','1151')+Math.max(0,resultat)+scM('1411','1481');
+  const totPC=fournisseurs+sc('4421')+sc('4431')+scM('4443','4455','4456')+sc('4481');
+  const bilanItems=[
+    {label:'Actif Total',val:totActif,color:'var(--red)'},
+    {label:'Financement permanent',val:totFP,color:'var(--purple,#7c3aed)'},
+    {label:'Passif circulant',val:totPC,color:'var(--orange)'},
+    {label:'Trésorerie Actif',val:tresoTotale,color:'var(--teal)'},
+  ];
+  let bilanHtml='';
+  bilanItems.forEach(it=>bilanHtml+=`<div class="dash-row"><div class="dr-nom">${it.label}</div><div class="dr-val" style="color:${it.color};">${fmt(it.val)}</div></div>`);
+  const eq=Math.abs(totActif-(totFP+totPC))<1;
+  bilanHtml+=`<div style="margin-top:10px;padding:8px;border-radius:7px;text-align:center;font-size:11.5px;font-weight:700;background:${eq?'#e8f8ef':'#fff0f0'};color:${eq?'var(--green)':'var(--red)'};">${eq?'✅ Bilan équilibré':'⚠️ Bilan non équilibré'}</div>`;
+  document.getElementById('dash-bilan').innerHTML=bilanHtml;
+
+  // CPC résumé
+  const marge=ventes-achats;
+  const cpcItems=[
+    {label:'Chiffre d\'affaires (CA)',val:ventes,color:'var(--green)'},
+    {label:'Total charges',val:achats,color:'var(--red)'},
+    {label:isP?'✅ Bénéfice net':'⚠️ Perte nette',val:Math.abs(marge),color:isP?'var(--green)':'var(--red)'},
+  ];
+  let cpcHtml='';
+  cpcItems.forEach(it=>cpcHtml+=`<div class="dash-row"><div class="dr-nom">${it.label}</div><div class="dr-val" style="color:${it.color};">${fmt(it.val)}</div></div>`);
+  const nbEcr=DB.ecritures.length;
+  const nbFac=DB.ecritures.filter(e=>e.type==='facture').length;
+  cpcHtml+=`<div style="margin-top:12px;padding:10px;background:var(--bg);border-radius:8px;font-size:11.5px;color:var(--muted);">
+    <div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Écritures total</span><strong>${nbEcr}</strong></div>
+    <div style="display:flex;justify-content:space-between;"><span>dont Factures</span><strong>${nbFac}</strong></div>
+  </div>`;
+  document.getElementById('dash-cpc').innerHTML=cpcHtml;
+}
+// ═══════════════════════════════════════
+const PDF_STYLE=`
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Montserrat',sans-serif;color:#1a1a2e;padding:20px 28px;font-size:11.5px;background:#fff;}
+  .ph{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;padding-bottom:12px;border-bottom:3px solid #0d2b6b;}
+  .ph-left .logo{font-size:20px;font-weight:800;color:#0d2b6b;letter-spacing:1px;}
+  .ph-left .soc{font-size:11px;color:#6b7a99;margin-top:2px;}
+  .ph-right{text-align:right;}
+  .ph-right .titre{font-size:15px;font-weight:800;color:#0d2b6b;}
+  .ph-right .date{font-size:11px;color:#6b7a99;margin-top:2px;}
+  table{width:100%;border-collapse:collapse;margin:14px 0;font-size:11.5px;}
+  thead th{background:#0d2b6b;color:#fff;padding:9px 12px;text-align:left;font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.4px;}
+  thead th.r{text-align:right;}
+  tbody td{padding:7px 12px;border-bottom:1px solid #e8eef5;font-size:11.5px;}
+  tbody td.r{text-align:right;font-weight:700;}
+  tbody td.num{font-weight:800;color:#0d2b6b;}
+  tbody td.crd{font-style:italic;color:#1a4fa0;padding-left:30px;}
+  tbody tr:hover td{background:#f5f8ff;}
+  .section-row td{background:#e8f0ff;font-weight:800;color:#0d2b6b;font-size:12px;padding:8px 12px;}
+  .section-row td.r{font-size:12px;}
+  .subtotal-row td{background:#f5f5f5;font-weight:800;border-top:2px solid #0d2b6b;padding:8px 12px;}
+  .subtotal-row td.r{font-size:12px;}
+  .total-row td{background:#0d2b6b;color:#fff;font-weight:800;font-size:13px;padding:10px 12px;}
+  .total-row td.r{text-align:right;}
+  .result-row td{background:#e8f8ef;color:#2d9e6b;font-weight:800;font-size:12px;padding:9px 12px;border-top:2px solid #2d9e6b;}
+  .result-row.loss td{background:#fff0f0;color:#e63946;border-top-color:#e63946;}
+  .zero{color:#bbb;}
+  .kpi-bar{display:flex;gap:0;border:1.5px solid #c8d4e8;border-radius:8px;overflow:hidden;margin-bottom:18px;}
+  .kpi{flex:1;padding:14px 16px;text-align:center;border-right:1.5px solid #c8d4e8;}
+  .kpi:last-child{border-right:none;}
+  .kpi-val{font-size:18px;font-weight:800;}
+  .kpi-lbl{font-size:10px;color:#6b7a99;font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-top:3px;}
+  .equil{text-align:center;padding:9px;font-weight:700;font-size:12px;border-radius:7px;margin-top:12px;}
+  .equil.ok{background:#e8f8ef;color:#2d9e6b;}
+  .equil.nok{background:#fff0f0;color:#e63946;}
+  .jentry{border:1px solid #c8d4e8;border-radius:7px;margin-bottom:10px;overflow:hidden;page-break-inside:avoid;}
+  .jdate{background:#e8f2ff;padding:7px 12px;font-weight:700;font-size:11px;color:#1a4fa0;display:flex;justify-content:space-between;border-bottom:1px solid #c8d4e8;}
+  .jrows table{margin:0;}
+  .jrows thead th{background:#f5f8ff;color:#6b7a99;padding:6px 12px;font-size:10px;}
+  .jrows tbody td{padding:6px 12px;font-size:11.5px;}
+  .gl-section{margin-bottom:18px;page-break-inside:avoid;}
+  .gl-title{font-size:13px;font-weight:800;color:#0d2b6b;padding:5px 0 6px;border-bottom:2px solid #c8d4e8;margin-bottom:8px;}
+  .gl-table{width:100%;border-collapse:collapse;font-size:11.5px;}
+  .gl-table th{background:#0d2b6b;color:#fff;padding:7px 12px;font-size:10.5px;font-weight:700;}
+  .gl-table td{padding:7px 12px;border-bottom:1px solid #e8eef5;}
+  .gl-table td.solde-d{color:#e63946;font-weight:800;}
+  .gl-table td.solde-c{color:#1a4fa0;font-weight:800;}
+  @media print{@page{margin:14mm;size:A4 portrait;}body{padding:0;}}
+`;
+
+function openPDF(titre,bodyHTML){
+  const soc=currentUser?.societe||'';
+  const date=new Date().toLocaleDateString('fr-MA');
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html lang="fr"><head>
+    <meta charset="UTF-8"/><title>BARECO – ${titre}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+    <style>${PDF_STYLE}</style></head><body>
+    <div class="ph">
+      <div class="ph-left"><div class="logo">🎓 BARECO</div><div class="soc">${soc||'—'}</div></div>
+      <div class="ph-right"><div class="titre">${titre}</div><div class="date">Imprimé le ${date}</div></div>
+    </div>
+    ${bodyHTML}
+    <script>window.onload=()=>setTimeout(()=>window.print(),400);<\/script>
+  </body></html>`);
+  win.document.close();
+}
+
+function printEtat(zoneId,titre){
+  // Route to the right print function
+  if(zoneId==='journal-print-zone') return printJournal();
+  if(zoneId==='gl-print-zone')      return printGL();
+  if(zoneId==='bilan-print-zone')   return printBilan();
+  if(zoneId==='cpc-wrap')           return printCPC();
+}
+
+// ── JOURNAL PDF ──
+function printJournal(){
+  if(!DB.ecritures.length){alert('Aucune écriture à imprimer.');return;}
+  const sorted=[...DB.ecritures].sort((a,b)=>a.date.localeCompare(b.date));
+  let html='';
+  sorted.forEach(e=>{
+    const typeLabel=e.type==='facture'?(e.soustype.includes('vente')?'Vente':'Achat'):e.type==='manuel'?'Manuel':e.soustype;
+    html+=`<div class="jentry">
+      <div class="jdate"><span>📅 ${fmtDate(e.date)} — Réf: ${e.ref} | ${e.libelle}</span><span>${typeLabel}</span></div>
+      <div class="jrows"><table>
+        <thead><tr><th>N° Compte</th><th>Libellé</th><th class="r">Débit</th><th class="r">Crédit</th></tr></thead>
+        <tbody>`;
+    e.lignes.forEach(l=>{
+      const isD=l.sens==='D';
+      html+=`<tr><td class="num">${l.num}</td><td class="${isD?'':'crd'}">${isD?l.nom:'&nbsp;&nbsp;&nbsp;'+l.nom}</td>
+        <td class="r">${isD?fmt(l.montant):''}</td><td class="r">${!isD?fmt(l.montant):''}</td></tr>`;
+    });
+    html+=`</tbody></table></div></div>`;
+  });
+  openPDF('Journal Comptable',html);
+}
+
+// ── GRAND LIVRE PDF ──
+function printGL(){
+  const S=buildSoldes();
+  if(!Object.keys(S).length){alert('Aucun compte à imprimer.');return;}
+  const groupes=[
+    {label:'Financement permanent',pre:['1']},
+    {label:'Actif immobilisé',pre:['2']},
+    {label:'Actif circulant',pre:['3']},
+    {label:'Passif circulant',pre:['4']},
+    {label:'Trésorerie',pre:['5']},
+    {label:'Charges',pre:['6']},
+    {label:'Produits',pre:['7']},
+  ];
+  let html='';
+  groupes.forEach(g=>{
+    const list=Object.values(S).filter(c=>g.pre.some(p=>String(c.num).startsWith(p)));
+    if(!list.length)return;
+    html+=`<div class="gl-section"><div class="gl-title">${g.label}</div>
+      <table class="gl-table"><thead><tr>
+        <th style="width:90px">N° Compte</th><th>Intitulé</th>
+        <th style="width:120px;text-align:right;">Total Débit</th>
+        <th style="width:120px;text-align:right;">Total Crédit</th>
+        <th style="width:130px;text-align:right;">Solde</th>
+      </tr></thead><tbody>`;
+    list.sort((a,b)=>String(a.num).localeCompare(String(b.num))).forEach(c=>{
+      const sol=c.D-c.C;const sd=sol>=0;
+      html+=`<tr>
+        <td class="num">${c.num}</td><td>${c.nom}</td>
+        <td style="text-align:right;font-weight:700;">${fmt(c.D)}</td>
+        <td style="text-align:right;font-weight:700;">${fmt(c.C)}</td>
+        <td class="${sd?'solde-d':'solde-c'}" style="text-align:right;">${sd?'D':'C'} ${fmt(Math.abs(sol))}</td>
+      </tr>`;
+    });
+    html+=`</tbody></table></div>`;
+  });
+  openPDF('Grand Livre',html);
+}
+
+// ── BILAN PDF ──
+function printBilan(){
+  const S=buildSoldes();
+  const sd=n=>Math.max(0,(S[n]?.D||0)-(S[n]?.C||0));
+  const sc=n=>Math.max(0,(S[n]?.C||0)-(S[n]?.D||0));
+  const sdM=(...ns)=>ns.reduce((s,n)=>s+sd(n),0);
+  const scM=(...ns)=>ns.reduce((s,n)=>s+sc(n),0);
+  // ACTIF
+  const terrains=sd('2311'),constructions=sd('2321'),instTech=sd('2331'),matTransp=sd('2340'),matBureau=sd('2350'),mobilier=sd('2355'),matInfo=sd('2360'),brevets=sd('2210');
+  const totAI=terrains+constructions+instTech+matTransp+matBureau+mobilier+matInfo+brevets;
+  const marchandises=sd('3111'),matieres=sd('3121'),clients=sdM('3421','3411','3431'),tvaRecAch=sd('34552'),tvaRecImmo=sdM('34511','34512'),autresCreances=sd('3471'),chargesAv=sd('3481');
+  const totAC=marchandises+matieres+clients+tvaRecAch+tvaRecImmo+autresCreances+chargesAv;
+  const banque=sd('5141'),ccp=sd('5142'),tg=sd('5143'),caisse=sd('5161');
+  const totTA=banque+ccp+tg+caisse;
+  const totActif=totAI+totAC+totTA;
+  // PASSIF
+  const capital=sc('1111'),reserves=scM('1121','1131'),report=sc('1151');
+  const ventes=scM('7111','7121','7131','7141'),achats=sdM('6111','6121','6132','6133','6134','6141','6142','6155','6171','6174','6193','6194','6196','6199');
+  const resultat=ventes-achats;
+  const emprunts=scM('1411','1481');
+  const totFP=capital+reserves+report+Math.max(0,resultat)+emprunts;
+  const fournisseurs=sc('4411'),personnel=sc('4421'),organismes=sc('4431'),etatIS=sc('4443'),tvaDue=scM('4455','4456'),autresDettes=sc('4481'),prodsAv=sc('4491');
+  const totPC=fournisseurs+personnel+organismes+etatIS+tvaDue+autresDettes+prodsAv;
+  const bancairesCred=sc('5193');
+  const totTP=bancairesCred;
+  const totPassif=totFP+totPC+totTP;
+  const eq=Math.abs(totActif-totPassif)<0.5;
+
+  const rA=(nom,val)=>`<tr><td style="padding-left:20px;">${nom}</td><td class="r ${val>0?'':'zero'}">${val>0?fmt(val):'—'}</td><td></td><td class="r zero">—</td></tr>`;
+  const rP=(nom,val)=>`<tr><td style="padding-left:20px;">${nom}</td><td class="r zero">—</td><td></td><td class="r ${val>0?'':'zero'}">${val>0?fmt(val):'—'}</td></tr>`;
+  const stA=(label,val)=>`<tr class="subtotal-row"><td>${label}</td><td class="r">${fmt(val)}</td><td></td><td class="r zero">—</td></tr>`;
+  const stP=(label,val)=>`<tr class="subtotal-row"><td>${label}</td><td class="r zero">—</td><td></td><td class="r">${fmt(val)}</td></tr>`;
+  const secA=(label)=>`<tr class="section-row"><td colspan="2">${label}</td><td colspan="2"></td></tr>`;
+  const secP=(label)=>`<tr class="section-row"><td colspan="2"></td><td colspan="2">${label}</td></tr>`;
+
+  const html=`
+  <div class="kpi-bar">
+    <div class="kpi"><div class="kpi-val" style="color:#e63946">${fmt(totActif)}</div><div class="kpi-lbl">Total Actif</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#1a4fa0">${fmt(totPassif)}</div><div class="kpi-lbl">Total Passif</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:${resultat>=0?'#2d9e6b':'#e63946'}">${(resultat>=0?'+':'')+fmt(resultat)}</div><div class="kpi-lbl">Résultat Net</div></div>
+  </div>
+  <table>
+    <thead><tr>
+      <th>ACTIF</th><th class="r">MONTANT</th>
+      <th>PASSIF</th><th class="r">MONTANT</th>
+    </tr></thead>
+    <tbody>
+      ${secA('🏗️ ACTIF IMMOBILISÉ')}${secP('💎 FINANCEMENT PERMANENT')}
+      ${rA('Brevets & licences (2210)',brevets)}${rP('Capital social (1111)',capital)}
+      ${rA('Terrains (2311)',terrains)}${rP('Réserves (1121/1131)',reserves)}
+      ${rA('Constructions (2321)',constructions)}${rP('Report à nouveau (1151)',report)}
+      ${rA('Installations techniques (2331)',instTech)}${rP(`Résultat ${resultat>=0?'(bénéfice)':'(perte)'}`,Math.abs(resultat))}
+      ${rA('Matériel de transport (2340)',matTransp)}${rP('Emprunts LT (1481)',emprunts)}
+      ${rA('Matériel de bureau (2350)',matBureau)}${stP('Sous-total FP',totFP)}
+      ${rA('Mobilier (2355)',mobilier)}${secP('📄 PASSIF CIRCULANT')}
+      ${rA('Matériel informatique (2360)',matInfo)}${rP('Fournisseurs (4411)',fournisseurs)}
+      ${stA('Sous-total Actif Immobilisé',totAI)}${rP('Personnel (4421)',personnel)}
+      ${secA('🔄 ACTIF CIRCULANT')}${rP('Organismes sociaux (4431)',organismes)}
+      ${rA('Marchandises (3111)',marchandises)}${rP('État IS (4443)',etatIS)}
+      ${rA('Matières premières (3121)',matieres)}${rP('TVA due (4455/4456)',tvaDue)}
+      ${rA('Clients et C.R (3421)',clients)}${rP('Créditeurs divers (4481)',autresDettes)}
+      ${rA('TVA récup. achats (34552)',tvaRecAch)}${rP('Produits constatés d\'avance',prodsAv)}
+      ${rA('TVA récup. immo (34511)',tvaRecImmo)}${stP('Sous-total Passif Circulant',totPC)}
+      ${rA('Autres créances (3471)',autresCreances)}${secP('🏛️ TRÉSORERIE PASSIF')}
+      ${stA('Sous-total Actif Circulant',totAC)}${rP('Banques créditrices (5193)',bancairesCred)}
+      ${secA('🏦 TRÉSORERIE ACTIF')}${stP('Sous-total Trésorerie Passif',totTP)}
+      ${rA('Banques (5141)',banque)}
+      ${rA('CCP (5142)',ccp)}
+      ${rA('Trésorerie Générale (5143)',tg)}
+      ${rA('Caisse (5161)',caisse)}
+      ${stA('Sous-total Trésorerie Actif',totTA)}
+      <tr class="total-row"><td>TOTAL ACTIF</td><td class="r">${fmt(totActif)}</td><td>TOTAL PASSIF</td><td class="r">${fmt(totPassif)}</td></tr>
+    </tbody>
+  </table>
+  <div class="equil ${eq?'ok':'nok'}">${eq?'✅ Bilan équilibré — Actif = Passif':'⚠️ Bilan non équilibré — Écart : '+fmt(Math.abs(totActif-totPassif))+' MAD'}</div>`;
+  openPDF('Bilan Comptable',html);
+}
+
+// ── CPC PDF ──
+function printCPC(){
+  const S=buildSoldes();
+  const gD=n=>Math.max(0,(S[n]?.D||0)-(S[n]?.C||0));
+  const gC=n=>Math.max(0,(S[n]?.C||0)-(S[n]?.D||0));
+  const ventes=gC('7111'),autresProd=gC('7141')+gC('7151')+gC('7181');
+  const achats=gD('6111'),loyer=gD('6132'),salaires=gD('6171'),chargesSoc=gD('6174');
+  const assurance=gD('6134'),pub=gD('6141'),transport=gD('6142'),honoraires=gD('6155');
+  const dotAmort=gD('6193')+gD('6194'),autresCharges=gD('6199');
+  const totalC=achats+loyer+salaires+chargesSoc+assurance+pub+transport+honoraires+dotAmort+autresCharges;
+  const totalP=ventes+autresProd;
+  const res=totalP-totalC;const isP=res>=0;
+  const cRow=(l,v,indent=true)=>`<tr><td style="padding-left:${indent?'22px':'12px'};">${l}</td><td class="r ${v>0?'':'zero'}">${v>0?fmt(v):'—'}</td><td></td><td class="r zero">—</td></tr>`;
+  const pRow=(l,v,indent=true)=>`<tr><td style="padding-left:${indent?'22px':'12px'};">${l}</td><td class="r zero">—</td><td></td><td class="r ${v>0?'':'zero'}">${v>0?fmt(v):'—'}</td></tr>`;
+  const html=`
+  <div class="kpi-bar">
+    <div class="kpi"><div class="kpi-val" style="color:#e63946">${fmt(totalC)}</div><div class="kpi-lbl">Total Charges</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:#2d9e6b">${fmt(totalP)}</div><div class="kpi-lbl">Total Produits</div></div>
+    <div class="kpi"><div class="kpi-val" style="color:${isP?'#2d9e6b':'#e63946'}">${(isP?'+':'-')+fmt(Math.abs(res))}</div><div class="kpi-lbl">${isP?'Bénéfice':'Perte'} Net</div></div>
+  </div>
+  <table>
+    <thead><tr><th>CHARGES</th><th class="r">MONTANT</th><th>PRODUITS</th><th class="r">MONTANT</th></tr></thead>
+    <tbody>
+      <tr class="section-row"><td colspan="2">I. CHARGES D'EXPLOITATION</td><td colspan="2">I. PRODUITS D'EXPLOITATION</td></tr>
+      ${cRow('Achats marchandises (6111)',achats)}${pRow('Ventes de marchandises (7111)',ventes)}
+      ${cRow('Loyers (6132)',loyer)}${pRow('Autres produits (7141/7151)',autresProd)}
+      ${cRow('Salaires (6171)',salaires)}
+      ${cRow('Charges sociales (6174)',chargesSoc)}
+      ${cRow('Assurances (6134)',assurance)}
+      ${cRow('Publicité (6141)',pub)}
+      ${cRow('Transport (6142)',transport)}
+      ${cRow('Honoraires (6155)',honoraires)}
+      ${cRow('Amortissements (6193)',dotAmort)}
+      ${cRow('Autres charges (6199)',autresCharges)}
+      <tr class="subtotal-row"><td>TOTAL CHARGES</td><td class="r">${fmt(totalC)}</td><td>TOTAL PRODUITS</td><td class="r">${fmt(totalP)}</td></tr>
+      <tr class="${isP?'result-row':'result-row loss'}">
+        <td colspan="2">${isP?'✅ BÉNÉFICE NET DE L\'EXERCICE':'⚠️ PERTE NETTE DE L\'EXERCICE'}</td>
+        <td colspan="2" class="r">${fmt(Math.abs(res))}</td>
+      </tr>
+    </tbody>
+  </table>`;
+  openPDF('Compte de Produits et Charges (CPC)',html);
+}
+
+// ═══════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════
+document.getElementById('fac-date').value=today();
+document.getElementById('op-date').value=today();
+document.getElementById('jm-date').value=today();
+document.getElementById('op-ref').value='OD-001';
+document.getElementById('jm-ref').value='JM-001';
+autoFacNum();
+renderOpFields();updateOpPreview();
+addJMRow('D');addJMRow('C');
+onImmoNatureChange();
+</script>
+</body>
+</html>
